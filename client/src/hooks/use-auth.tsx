@@ -59,7 +59,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<User | null, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
-    retry: false
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    retry: false,
+    staleTime: 0
   });
 
   // Determina se o usuário é administrador
@@ -72,11 +75,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (user: User) => {
+      // Invalidar a consulta atual para forçar uma nova busca
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      // Atualizar o cache também
       queryClient.setQueryData(["/api/user"], user);
       toast({
         title: "Login realizado com sucesso",
         description: `Bem-vindo${user.displayName ? `, ${user.displayName}` : ""}!`,
       });
+      // Pequeno atraso antes de refetch para garantir que tudo foi atualizado
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/user"] });
+      }, 300);
     },
     onError: (error: Error) => {
       toast({
@@ -94,11 +104,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (user: User) => {
+      // Invalidar a consulta atual para forçar uma nova busca
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      // Atualizar o cache também
       queryClient.setQueryData(["/api/user"], user);
       toast({
         title: "Registro realizado com sucesso",
         description: "Sua conta foi criada e você já está logado.",
       });
+      // Pequeno atraso antes de refetch para garantir que tudo foi atualizado
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/user"] });
+      }, 300);
     },
     onError: (error: Error) => {
       toast({
@@ -115,11 +132,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiRequest("POST", "/api/logout");
     },
     onSuccess: () => {
+      // Atualizar o cache para null
       queryClient.setQueryData(["/api/user"], null);
+      // Invalidar a consulta
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      
       toast({
         title: "Logout realizado com sucesso",
         description: "Você saiu da sua conta.",
       });
+      
+      // Pequeno atraso antes de refetch para garantir que tudo foi atualizado
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/user"] });
+      }, 300);
     },
     onError: (error: Error) => {
       toast({

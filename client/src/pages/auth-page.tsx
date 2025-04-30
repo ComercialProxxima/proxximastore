@@ -76,12 +76,20 @@ export default function AuthPage() {
 
   // Login submit handler
   const onLoginSubmit = (data: LoginFormData) => {
-    loginMutation.mutate(data);
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        navigate("/");
+      }
+    });
   };
 
   // Register submit handler
   const onRegisterSubmit = (data: RegisterFormData) => {
-    registerMutation.mutate(data);
+    registerMutation.mutate(data, {
+      onSuccess: () => {
+        navigate("/");
+      }
+    });
   };
 
   return (

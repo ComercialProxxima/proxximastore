@@ -18,46 +18,21 @@ import { cn } from "@/lib/utils";
 
 const profileSchema = z.object({
   displayName: z.string().min(3, "O nome de exibição deve ter pelo menos 3 caracteres").optional().nullable(),
-  // Sempre opcional para permitir atualização do perfil sem alterar a senha
   currentPassword: z.string().optional(),
   newPassword: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres").optional(),
   confirmPassword: z.string().optional(),
 }).refine((data) => {
-  // Verifica se a nova senha está sendo definida
-  const isChangingPassword = data.newPassword && data.newPassword.trim() !== "";
+  // Se estiver alterando a senha, a confirmação deve coincidir
+  if (data.newPassword && !data.confirmPassword) return false;
+  if (!data.newPassword && data.confirmPassword) return false;
+  if (data.newPassword && data.confirmPassword && data.newPassword !== data.confirmPassword) return false;
   
   // Se estiver alterando a senha, a senha atual é obrigatória
-  if (isChangingPassword && (!data.currentPassword || data.currentPassword.trim() === "")) {
-    return false;
-  }
+  if (data.newPassword && !data.currentPassword) return false;
   
   return true;
 }, {
-  message: "Senha atual é obrigatória para alterar a senha",
-  path: ["currentPassword"]
-}).refine((data) => {
-  // Verifica se a nova senha está sendo definida
-  const isChangingPassword = data.newPassword && data.newPassword.trim() !== "";
-  
-  // Se estiver alterando a senha, a confirmação deve ser fornecida e deve coincidir
-  if (isChangingPassword) {
-    if (!data.confirmPassword || data.confirmPassword.trim() === "") {
-      return false;
-    }
-    
-    if (data.newPassword !== data.confirmPassword) {
-      return false;
-    }
-  }
-  
-  // Se houver uma confirmação, a nova senha deve ser fornecida
-  if (data.confirmPassword && data.confirmPassword.trim() !== "" && (!data.newPassword || data.newPassword.trim() === "")) {
-    return false;
-  }
-  
-  return true;
-}, {
-  message: "As senhas não coincidem ou estão incompletas",
+  message: "Verifique os campos de senha. Senha atual é obrigatória para alterar a senha e as novas senhas devem coincidir.",
   path: ["confirmPassword"]
 });
 
@@ -85,15 +60,9 @@ export default function Account() {
       const formData = new FormData();
       
       // Adicionar campos de texto ao FormData
-      if (data.displayName !== undefined) formData.append("displayName", data.displayName || "");
-      
-      // Só adicionar campos de senha se estiver alterando senha
-      const isChangingPassword = data.newPassword && data.newPassword.trim() !== "";
-      if (isChangingPassword) {
-        // Se está alterando senha, ambos os campos são obrigatórios
-        if (data.currentPassword) formData.append("currentPassword", data.currentPassword);
-        if (data.newPassword) formData.append("newPassword", data.newPassword);
-      }
+      if (data.displayName) formData.append("displayName", data.displayName);
+      if (data.currentPassword) formData.append("currentPassword", data.currentPassword);
+      if (data.newPassword) formData.append("newPassword", data.newPassword);
       
       // Adicionar imagem se existir
       if (selectedImage) {
@@ -141,10 +110,7 @@ export default function Account() {
   const updateProfileImageMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
-      // Adicionar apenas a imagem, sem nenhum campo de senha
       formData.append("profileImage", file);
-      // Adicionar um campo vazio para displayName para que o backend tenha pelo menos um campo para atualizar
-      formData.append("displayName", user?.displayName || "");
       
       const res = await fetch("/api/protected/profile", {
         method: "PATCH",

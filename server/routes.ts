@@ -573,7 +573,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { displayName, currentPassword, newPassword } = req.body;
       
-      // Verificar se o usuário existe
+      // Verificar a senha atual
       const user = await storage.getUser(req.user.id);
       if (!user) {
         return res.status(404).json({ message: "Usuário não encontrado" });
@@ -582,29 +582,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Preparar dados de atualização
       const updateData: any = {};
       
-      // Se estiver atualizando a senha
-      if (newPassword && newPassword.trim() !== '') {
+      // Se estiver atualizando a senha, verificar a senha atual
+      if (newPassword) {
         // Importar funções de autenticação
         const { comparePasswords, hashPassword } = await import("./auth");
         
         // Se estiver mudando a senha, a senha atual é obrigatória
-        if (!currentPassword || currentPassword.trim() === '') {
+        if (!currentPassword) {
           return res.status(400).json({ message: "Senha atual é obrigatória para alterar a senha" });
         }
         
-        try {
-          // Verificar se a senha atual está correta
-          const passwordValid = await comparePasswords(currentPassword, user.password);
-          if (!passwordValid) {
-            return res.status(400).json({ message: "Senha atual incorreta" });
-          }
-          
-          // Definir a nova senha
-          updateData.password = await hashPassword(newPassword);
-        } catch (error) {
-          console.error("Erro ao verificar senha:", error);
-          return res.status(400).json({ message: "Erro ao verificar senha atual" });
+        // Verificar se a senha atual está correta
+        const passwordValid = await comparePasswords(currentPassword, user.password);
+        if (!passwordValid) {
+          return res.status(400).json({ message: "Senha atual incorreta" });
         }
+        
+        // Definir a nova senha
+        updateData.password = await hashPassword(newPassword);
       }
       
       // Definir nome de exibição se fornecido

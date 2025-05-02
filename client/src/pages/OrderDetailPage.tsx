@@ -179,7 +179,7 @@ export default function OrderDetailPage() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <CardTitle>Pedido #{orderDetail.order.id}</CardTitle>
+                <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Pedido #{orderDetail.order.id}</CardTitle>
                 <CardDescription>
                   Realizado em {formatDate(orderDetail.order.createdAt)}
                 </CardDescription>
@@ -190,7 +190,7 @@ export default function OrderDetailPage() {
 
           <CardContent className="space-y-6">
             <div>
-              <h3 className="text-lg font-medium mb-3">Itens do Pedido</h3>
+              <h3 className="text-lg font-medium mb-3 text-primary">Itens do Pedido</h3>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -237,7 +237,7 @@ export default function OrderDetailPage() {
 
             <div className="flex flex-col sm:flex-row justify-between">
               <div>
-                <h3 className="text-lg font-medium mb-2">Resumo do Pedido</h3>
+                <h3 className="text-lg font-medium mb-2 text-primary">Resumo do Pedido</h3>
                 <p className="text-sm text-muted-foreground">
                   Status atual: {orderDetail.order.status === "pending"
                     ? "Pendente de confirmação"
@@ -247,8 +247,8 @@ export default function OrderDetailPage() {
                 </p>
               </div>
               <div className="mt-4 sm:mt-0 flex flex-col items-end">
-                <div className="text-lg font-medium">
-                  Total: {orderDetail.order.totalPoints.toLocaleString("pt-BR")} pontos
+                <div className="text-lg font-medium text-secondary">
+                  Total: <span className="font-semibold">{orderDetail.order.totalPoints.toLocaleString("pt-BR")}</span> pontos
                 </div>
               </div>
             </div>

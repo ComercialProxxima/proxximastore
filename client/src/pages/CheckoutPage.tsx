@@ -256,7 +256,7 @@ export default function CheckoutPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Finalizar pedido</CardTitle>
+            <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Finalizar pedido</CardTitle>
             <CardDescription>
               Revise seu pedido antes de confirmar
             </CardDescription>
@@ -264,7 +264,7 @@ export default function CheckoutPage() {
 
           <CardContent className="space-y-6">
             <div>
-              <h3 className="text-lg font-medium mb-3">Produto selecionado</h3>
+              <h3 className="text-lg font-medium mb-3 text-primary">Produto selecionado</h3>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -343,14 +343,14 @@ export default function CheckoutPage() {
 
             <div className="flex flex-col sm:flex-row justify-between">
               <div>
-                <h3 className="text-lg font-medium mb-2">Resumo</h3>
+                <h3 className="text-lg font-medium mb-2 text-primary">Resumo</h3>
                 <p className="text-sm text-muted-foreground">
-                  Pontos disponíveis: {user?.points?.toLocaleString("pt-BR") || 0}
+                  Pontos disponíveis: <span className="text-primary font-medium">{user?.points?.toLocaleString("pt-BR") || 0}</span>
                 </p>
               </div>
               <div className="mt-4 sm:mt-0 flex flex-col items-end">
-                <div className="text-lg font-medium">
-                  Total: {totalPoints.toLocaleString("pt-BR")} pontos
+                <div className="text-lg font-medium text-secondary">
+                  Total: <span className="font-semibold">{totalPoints.toLocaleString("pt-BR")}</span> pontos
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Restante após pedido: {user && (user.points - totalPoints > 0 ? (user.points - totalPoints).toLocaleString("pt-BR") : 0)} pontos

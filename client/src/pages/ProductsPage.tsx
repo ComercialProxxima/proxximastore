@@ -59,8 +59,8 @@ export default function ProductsPage() {
     return (
       <Layout>
         <div className="text-center">
-          <Package className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h2 className="mt-4 text-lg font-medium">Nenhum produto disponível</h2>
+          <Package className="mx-auto h-12 w-12 text-secondary opacity-40" />
+          <h2 className="mt-4 text-lg font-medium text-primary">Nenhum produto disponível</h2>
           <p className="mt-2 text-muted-foreground">
             Ainda não há produtos disponíveis para troca por pontos.
           </p>
@@ -73,9 +73,9 @@ export default function ProductsPage() {
     <Layout>
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">Produtos Disponíveis</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Produtos Disponíveis</h1>
           <p className="text-muted-foreground">
-            Troque seus pontos ({user?.points || 0} disponíveis) por produtos exclusivos
+            Troque seus pontos (<span className="font-semibold text-secondary">{user?.points || 0}</span> disponíveis) por produtos exclusivos
           </p>
         </div>
       </div>
@@ -94,7 +94,7 @@ export default function ProductsPage() {
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full">
-                    <Package className="h-16 w-16 text-muted-foreground" />
+                    <Package className="h-16 w-16 text-secondary opacity-50" />
                   </div>
                 )}
                 <Badge 
@@ -106,19 +106,19 @@ export default function ProductsPage() {
                 </Badge>
               </div>
               <CardHeader className="pb-2">
-                <CardTitle>{product.name}</CardTitle>
+                <CardTitle className="text-primary">{product.name}</CardTitle>
               </CardHeader>
               <CardContent className="pb-2 flex-grow">
                 <p className="text-sm text-muted-foreground line-clamp-3">
                   {product.description || 'Sem descrição disponível'}
                 </p>
                 {product.stock <= 5 && product.stock > 0 && (
-                  <Badge variant="outline" className="mt-2 bg-amber-100 text-amber-800 border-amber-200">
+                  <Badge variant="outline" className="mt-2 bg-opacity-10 bg-secondary text-secondary border-secondary">
                     Apenas {product.stock} em estoque
                   </Badge>
                 )}
                 {product.stock === 0 && (
-                  <Badge variant="outline" className="mt-2 bg-red-100 text-red-800 border-red-200">
+                  <Badge variant="outline" className="mt-2 bg-opacity-10 bg-primary text-primary border-primary">
                     Esgotado
                   </Badge>
                 )}

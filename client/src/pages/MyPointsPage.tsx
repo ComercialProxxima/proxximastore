@@ -109,7 +109,7 @@ export default function MyPointsPage() {
   return (
     <Layout>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Meus Pontos</h1>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Meus Pontos</h1>
         <p className="text-muted-foreground">
           Visualize seu saldo de pontos e histórico de transações
         </p>
@@ -119,12 +119,12 @@ export default function MyPointsPage() {
         {/* Card de saldo atual */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Saldo Atual</CardTitle>
+            <CardTitle className="text-lg text-primary">Saldo Atual</CardTitle>
             <CardDescription>Seus pontos disponíveis</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-end">
-              <span className="text-3xl font-bold">{user?.points || 0}</span>
+              <span className="text-3xl font-bold text-primary">{user?.points || 0}</span>
               <span className="text-muted-foreground ml-2 mb-1">pontos</span>
             </div>
           </CardContent>
@@ -133,12 +133,12 @@ export default function MyPointsPage() {
         {/* Card de pontos ganhos */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Total Ganho</CardTitle>
+            <CardTitle className="text-lg text-secondary">Total Ganho</CardTitle>
             <CardDescription>Pontos acumulados</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-end">
-              <span className="text-3xl font-bold text-green-500">{stats.earned}</span>
+              <span className="text-3xl font-bold text-secondary">{stats.earned}</span>
               <span className="text-muted-foreground ml-2 mb-1">pontos</span>
             </div>
           </CardContent>
@@ -147,12 +147,12 @@ export default function MyPointsPage() {
         {/* Card de pontos gastos */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Total Gasto</CardTitle>
+            <CardTitle className="text-lg text-primary">Total Gasto</CardTitle>
             <CardDescription>Pontos utilizados em trocas</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-end">
-              <span className="text-3xl font-bold text-red-500">{stats.spent}</span>
+              <span className="text-3xl font-bold text-primary">{stats.spent}</span>
               <span className="text-muted-foreground ml-2 mb-1">pontos</span>
             </div>
           </CardContent>
@@ -161,7 +161,7 @@ export default function MyPointsPage() {
 
       <div className="bg-white rounded-lg border shadow-sm">
         <div className="p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="text-lg font-medium">Histórico de Transações</h2>
+          <h2 className="text-lg font-medium bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Histórico de Transações</h2>
           <div className="w-full sm:w-48">
             <Select
               value={transactionType}
@@ -210,13 +210,13 @@ export default function MyPointsPage() {
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>
                       {transaction.transactionType === "earned" && (
-                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                        <Badge className="bg-opacity-10 bg-secondary text-secondary hover:bg-opacity-20">
                           <TrendingUp className="h-3.5 w-3.5 mr-1" />
                           Recebido
                         </Badge>
                       )}
                       {transaction.transactionType === "spent" && (
-                        <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+                        <Badge className="bg-opacity-10 bg-primary text-primary hover:bg-opacity-20">
                           <TrendingDown className="h-3.5 w-3.5 mr-1" />
                           Gasto
                         </Badge>

@@ -240,7 +240,7 @@ export default function EmployeesPage() {
                           {employee.role === UserRoleEnum.ADMIN ? "Administrador" : "Funcionário"}
                         </Badge>
                       </TableCell>
-                      <TableCell>{employee.points} pts</TableCell>
+                      <TableCell>{employee.points} xCoins</TableCell>
                       <TableCell>
                         {employee.createdAt ? 
                           format(new Date(employee.createdAt), "dd/MM/yyyy", { locale: ptBR }) : 
@@ -267,21 +267,21 @@ export default function EmployeesPage() {
             <CardHeader>
               <CardTitle>Nenhum funcionário encontrado</CardTitle>
               <CardDescription>
-                Cadastre funcionários para que eles possam utilizar o sistema de pontos.
+                Cadastre funcionários para que eles possam utilizar o sistema de xCoins.
               </CardDescription>
             </CardHeader>
           </Card>
         )}
       </div>
 
-      {/* Dialog para adicionar pontos */}
+      {/* Dialog para adicionar xCoins */}
       <Dialog open={isPointsDialogOpen} onOpenChange={setIsPointsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Adicionar Pontos</DialogTitle>
+            <DialogTitle>Adicionar xCoins</DialogTitle>
             <DialogDescription>
-              Adicione pontos à conta de {selectedEmployee?.displayName || selectedEmployee?.username}.
-              Atualmente possui {selectedEmployee?.points || 0} pontos.
+              Adicione xCoins à conta de {selectedEmployee?.displayName || selectedEmployee?.username}.
+              Atualmente possui {selectedEmployee?.points || 0} xCoins.
             </DialogDescription>
           </DialogHeader>
 
@@ -292,12 +292,12 @@ export default function EmployeesPage() {
                 name="points"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Quantidade de Pontos</FormLabel>
+                    <FormLabel>Quantidade de xCoins</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} min={1} />
                     </FormControl>
                     <FormDescription>
-                      Número de pontos a serem adicionados
+                      Número de xCoins a serem adicionados
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -314,7 +314,7 @@ export default function EmployeesPage() {
                       <Input {...field} placeholder="Ex: Participação em projeto" />
                     </FormControl>
                     <FormDescription>
-                      Motivo pelo qual os pontos estão sendo adicionados
+                      Motivo pelo qual os xCoins estão sendo adicionados
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -339,7 +339,7 @@ export default function EmployeesPage() {
                       Adicionando...
                     </>
                   ) : (
-                    "Adicionar Pontos"
+                    "Adicionar xCoins"
                   )}
                 </Button>
               </DialogFooter>

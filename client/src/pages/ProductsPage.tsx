@@ -157,12 +157,12 @@ export default function ProductsPage() {
                   {product.description || 'Sem descrição disponível'}
                 </p>
                 {product.stock <= 5 && product.stock > 0 && (
-                  <Badge variant="outline" className="mt-2 bg-opacity-10 bg-secondary text-secondary border-secondary">
+                  <Badge variant="outline" className="mt-2 bg-opacity-10 bg-primary text-primary border-primary">
                     Apenas {product.stock} em estoque
                   </Badge>
                 )}
                 {product.stock === 0 && (
-                  <Badge variant="outline" className="mt-2 bg-opacity-10 bg-primary text-primary border-primary">
+                  <Badge variant="outline" className="mt-2 bg-opacity-10 bg-destructive text-destructive border-destructive">
                     Esgotado
                   </Badge>
                 )}

@@ -17,16 +17,21 @@ import { Input } from "@/components/ui/input";
 
 const profileSchema = z.object({
   displayName: z.string().min(3, "O nome de exibição deve ter pelo menos 3 caracteres").optional().nullable(),
-  currentPassword: z.string().min(1, "Senha atual é obrigatória para alterações"),
+  currentPassword: z.string().optional(),
   newPassword: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres").optional(),
   confirmPassword: z.string().optional(),
 }).refine((data) => {
-  if (data.newPassword && !data.confirmPassword) return false;
-  if (!data.newPassword && data.confirmPassword) return false;
-  if (data.newPassword && data.confirmPassword && data.newPassword !== data.confirmPassword) return false;
+  // Se o usuário estiver tentando alterar a senha
+  if (data.newPassword || data.confirmPassword) {
+    // Verificar se as senhas coincidem
+    if (data.newPassword !== data.confirmPassword) return false;
+    
+    // Se estiver tentando definir uma nova senha, a senha atual deve ser fornecida
+    if (data.newPassword && !data.currentPassword) return false;
+  }
   return true;
 }, {
-  message: "As senhas não coincidem",
+  message: "As senhas não coincidem ou senha atual não fornecida",
   path: ["confirmPassword"]
 });
 
@@ -136,8 +141,11 @@ export default function Account() {
                       <FormItem>
                         <FormLabel>Nome de Exibição</FormLabel>
                         <FormControl>
-                          <Input placeholder="Seu nome completo" {...field} value={field.value || ""} />
+                          <Input placeholder="Seu nome completo (opcional)" {...field} value={field.value || ""} />
                         </FormControl>
+                        <p className="text-xs text-muted-foreground">
+                          Nome que será exibido no sistema. Mínimo de 3 caracteres.
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -167,8 +175,11 @@ export default function Account() {
                       <FormItem>
                         <FormLabel>Senha Atual</FormLabel>
                         <FormControl>
-                          <Input type="password" {...field} />
+                          <Input type="password" placeholder="Necessária apenas para alterar senha" {...field} />
                         </FormControl>
+                        <p className="text-xs text-muted-foreground">
+                          Obrigatória apenas se você quiser alterar sua senha
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -182,8 +193,11 @@ export default function Account() {
                         <FormItem>
                           <FormLabel>Nova Senha</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} />
+                            <Input type="password" placeholder="Opcional" {...field} />
                           </FormControl>
+                          <p className="text-xs text-muted-foreground">
+                            Mínimo de 6 caracteres
+                          </p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -195,8 +209,11 @@ export default function Account() {
                         <FormItem>
                           <FormLabel>Confirmar Nova Senha</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} />
+                            <Input type="password" placeholder="Opcional" {...field} />
                           </FormControl>
+                          <p className="text-xs text-muted-foreground">
+                            Deve ser igual à nova senha
+                          </p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -204,7 +221,7 @@ export default function Account() {
                   </div>
                 </div>
                 
-                <div className="flex justify-end">
+                <div className="flex flex-col items-end gap-2">
                   <Button 
                     type="submit"
                     className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
@@ -219,6 +236,9 @@ export default function Account() {
                       "Salvar Alterações"
                     )}
                   </Button>
+                  <p className="text-xs text-muted-foreground italic">
+                    Nenhum campo é obrigatório para salvar. Preencha apenas os campos que deseja alterar.
+                  </p>
                 </div>
               </form>
             </Form>

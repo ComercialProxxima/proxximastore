@@ -555,25 +555,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { displayName, currentPassword, newPassword } = req.body;
       
-      // Verificar a senha atual
+      // Buscar usuário
       const user = await storage.getUser(req.user.id);
       if (!user) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
       
-      // Importar funções de autenticação
-      const { comparePasswords, hashPassword } = await import("./auth");
-      
-      // Comparar senha atual
-      const passwordValid = await comparePasswords(currentPassword, user.password);
-      if (!passwordValid) {
-        return res.status(400).json({ message: "Senha atual incorreta" });
-      }
-      
       // Preparar dados de atualização
       const updateData: any = {};
-      if (displayName !== undefined) updateData.displayName = displayName;
-      if (newPassword) updateData.password = await hashPassword(newPassword);
+      
+      // Atualizar displayName se fornecido
+      if (displayName !== undefined) {
+        updateData.displayName = displayName;
+      }
+      
+      // Se o usuário estiver tentando mudar a senha
+      if (newPassword) {
+        // Importar funções de autenticação
+        const { comparePasswords, hashPassword } = await import("./auth");
+        
+        // Verificar se a senha atual foi fornecida
+        if (!currentPassword) {
+          return res.status(400).json({ message: "Senha atual é necessária para alterar a senha" });
+        }
+        
+        // Comparar senha atual
+        const passwordValid = await comparePasswords(currentPassword, user.password);
+        if (!passwordValid) {
+          return res.status(400).json({ message: "Senha atual incorreta" });
+        }
+        
+        // Atualizar senha
+        updateData.password = await hashPassword(newPassword);
+      }
+      
+      // Se não houver nada para atualizar, retornar o usuário atual
+      if (Object.keys(updateData).length === 0) {
+        const { password, ...userWithoutPassword } = user;
+        return res.json(userWithoutPassword);
+      }
       
       // Atualizar usuário
       const updatedUser = await storage.updateUser(req.user.id, updateData);

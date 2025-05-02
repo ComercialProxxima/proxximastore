@@ -553,7 +553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rota para atualizar o perfil do usuário
   app.patch("/api/protected/profile", async (req: Request, res: Response) => {
     try {
-      const { displayName, currentPassword, newPassword } = req.body;
+      const { displayName, currentPassword, newPassword, unit, profileImageUrl } = req.body;
       
       // Verificar a senha atual
       const user = await storage.getUser(req.user.id);
@@ -574,6 +574,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updateData: any = {};
       if (displayName !== undefined) updateData.displayName = displayName;
       if (newPassword) updateData.password = await hashPassword(newPassword);
+      if (unit !== undefined) updateData.unit = unit;
+      if (profileImageUrl !== undefined) updateData.profileImageUrl = profileImageUrl;
       
       // Atualizar usuário
       const updatedUser = await storage.updateUser(req.user.id, updateData);

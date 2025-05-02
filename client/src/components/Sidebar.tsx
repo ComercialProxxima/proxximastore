@@ -45,11 +45,11 @@ export default function Sidebar() {
   // Determinar estilo da barra lateral com base no estado
   const sidebarClass = `
     ${isMobile ? 
-      `fixed inset-y-0 left-0 z-50 bg-primary/5 border-r border-primary/20 transform ${
+      `fixed inset-y-0 left-0 z-50 bg-primary text-white border-r border-white/10 transform ${
         isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
       } transition-transform duration-200 ease-in-out w-64` 
       : 
-      `min-h-screen sticky top-0 border-r border-primary/20 bg-primary/5 ${
+      `min-h-screen sticky top-0 border-r border-white/10 bg-primary text-white ${
         isCollapsed ? 'w-20' : 'w-64'
       } transition-all duration-300 ease-in-out`
     }
@@ -124,20 +124,19 @@ export default function Sidebar() {
   ] : [];
 
   // Renderizar um item do menu
-  const renderMenuItem = (item: any, className = "") => (
+  const renderMenuItem = (item: any, index: number) => (
     <Link href={item.href} key={item.href}>
       <div 
         className={`
           flex items-center py-3 px-4 rounded-md cursor-pointer
           ${item.active ? 
-            'bg-secondary/10 text-secondary border-l-4 border-secondary font-semibold' : 
-            'hover:bg-primary/10 text-muted-foreground hover:text-foreground border-l-4 border-transparent'
+            'bg-secondary/20 text-white border-l-4 border-secondary font-semibold' : 
+            'hover:bg-white/10 text-white hover:text-white border-l-4 border-transparent'
           }
-          ${className}
         `}
         onClick={() => isMobile && setIsMobileMenuOpen(false)}
       >
-        <div className={`${isCollapsed ? 'mx-auto' : 'mr-3'} ${item.active ? 'text-secondary' : 'text-primary/70'}`}>
+        <div className={`${isCollapsed ? 'mx-auto' : 'mr-3'} ${item.active ? 'text-secondary' : index % 2 === 0 ? 'text-white' : 'text-secondary'}`}>
           {item.icon}
         </div>
         {!isCollapsed && <span className="font-medium">{item.label}</span>}
@@ -151,14 +150,19 @@ export default function Sidebar() {
       <div className={sidebarClass}>
         <div className="flex flex-col h-full">
           {/* Header com logo */}
-          <div className={`p-4 ${isCollapsed ? 'items-center justify-center' : ''} flex border-b border-primary/30 bg-gradient-to-r from-primary/20 to-secondary/10`}>
+          <div className={`p-4 ${isCollapsed ? 'items-center justify-center' : ''} flex border-b border-white/20`}>
             <Link href={isAdmin ? "/admin" : "/"}>
-              <div className={`flex ${isCollapsed ? 'justify-center' : 'items-center space-x-2'} cursor-pointer`}>
-                <Package className="h-6 w-6 text-secondary" />
+              <div className={`flex ${isCollapsed ? 'justify-center' : 'flex-col'} cursor-pointer`}>
+                <Package className="h-6 w-6 text-secondary mx-auto" />
                 {!isCollapsed && (
-                  <span className="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    Proxxima
-                  </span>
+                  <div className="flex flex-col mt-2 text-center">
+                    <span className="font-bold text-lg text-white">
+                      Proxxima
+                    </span>
+                    <span className="font-bold text-lg text-white">
+                      Store
+                    </span>
+                  </div>
                 )}
               </div>
             </Link>
@@ -166,7 +170,7 @@ export default function Sidebar() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="ml-auto text-primary hover:text-secondary hover:bg-secondary/10"
+                className="ml-auto text-white hover:text-secondary hover:bg-secondary/10"
                 onClick={() => setIsCollapsed(!isCollapsed)}
               >
                 {isCollapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
@@ -175,29 +179,29 @@ export default function Sidebar() {
           </div>
 
           {/* Perfil do usuário */}
-          <div className={`px-4 py-6 border-b border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5 ${isCollapsed ? 'text-center' : ''}`}>
+          <div className={`px-4 py-6 border-b border-white/20 ${isCollapsed ? 'text-center' : ''}`}>
             <div className={`${isCollapsed ? 'flex flex-col items-center' : 'flex items-center space-x-3'}`}>
-              <Avatar className={`${isCollapsed ? 'mx-auto mb-3' : ''} h-10 w-10 ring-2 ring-secondary/30 ring-offset-2 ring-offset-primary/5`}>
+              <Avatar className={`${isCollapsed ? 'mx-auto mb-3' : ''} h-10 w-10 ring-2 ring-secondary ring-offset-1 ring-offset-white/10`}>
                 {user?.profileImageUrl ? (
                   <AvatarImage src={user.profileImageUrl} alt="Foto de perfil" />
                 ) : (
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
+                  <AvatarFallback className="bg-secondary text-white">
                     {getInitials()}
                   </AvatarFallback>
                 )}
               </Avatar>
               {!isCollapsed && (
                 <div>
-                  <p className="font-medium text-sm text-primary">{user?.displayName || user?.username}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  <p className="font-medium text-sm text-white">{user?.displayName || user?.username}</p>
+                  <p className="text-xs text-white/70">{user?.email}</p>
                   {user?.unit && (
-                    <p className="text-xs mt-1 bg-primary/10 text-primary inline-block px-2 py-0.5 rounded-sm">
+                    <p className="text-xs mt-1 bg-white/10 text-white inline-block px-2 py-0.5 rounded-sm">
                       {user.unit}
                     </p>
                   )}
                   <div className="flex items-center mt-1">
                     <Award className="w-4 h-4 mr-1 text-secondary" />
-                    <span className="text-xs font-medium bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    <span className="text-xs font-medium text-secondary">
                       {user?.points || 0} xCoins
                     </span>
                   </div>
@@ -210,7 +214,7 @@ export default function Sidebar() {
               {isCollapsed && (
                 <div className="flex items-center mt-1">
                   <Award className="w-4 h-4 mr-1 text-secondary" />
-                  <span className="text-xs font-medium">{user?.points || 0}</span>
+                  <span className="text-xs font-medium text-white">{user?.points || 0}</span>
                 </div>
               )}
             </div>
@@ -219,34 +223,34 @@ export default function Sidebar() {
           {/* Menu principal */}
           <div className="flex-1 py-4 overflow-y-auto">
             <nav className="space-y-1 px-2">
-              {mainMenuItems.filter(item => !(isAdmin && item.href === "/")).map(item => renderMenuItem(item))}
+              {mainMenuItems.filter(item => !(isAdmin && item.href === "/")).map((item, index) => renderMenuItem(item, index))}
             </nav>
 
             {/* Menu do administrador */}
             {isAdmin && adminMenuItems.length > 0 && (
               <div className="mt-6">
                 <div className={`px-4 mb-2 ${isCollapsed ? 'text-center' : ''}`}>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <p className="text-xs font-semibold text-white/70 uppercase tracking-wider">
                     {isCollapsed ? 'ADMIN' : 'ADMINISTRAÇÃO'}
                   </p>
                 </div>
                 <nav className="space-y-1 px-2">
-                  {adminMenuItems.map(item => renderMenuItem(item, "text-primary"))}
+                  {adminMenuItems.map((item, index) => renderMenuItem(item, index + 100))}
                 </nav>
               </div>
             )}
           </div>
 
           {/* Botão de logout */}
-          <div className="p-4 border-t border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+          <div className="p-4 border-t border-white/20">
             <Button 
               variant="outline" 
               className={`${isCollapsed ? 'justify-center w-full p-2' : 'justify-start w-full'} 
-                border-primary/20 hover:border-secondary/50 hover:bg-secondary/10 hover:text-secondary
+                border-white/30 text-white hover:border-secondary hover:bg-secondary/20 hover:text-white
                 transition-all duration-300`}
               onClick={handleLogout}
             >
-              <LogOut className={`${isCollapsed ? '' : 'mr-2'} h-5 w-5 text-primary group-hover:text-secondary`} />
+              <LogOut className={`${isCollapsed ? '' : 'mr-2'} h-5 w-5 text-secondary`} />
               {!isCollapsed && <span>Sair</span>}
             </Button>
           </div>

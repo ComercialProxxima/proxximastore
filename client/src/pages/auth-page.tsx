@@ -103,14 +103,15 @@ export default function AuthPage() {
             </p>
           </div>
 
-          <Card>
-            <CardHeader>
+          <Card className="border-primary/20 overflow-hidden shadow-md">
+            <div className="bg-gradient-to-r from-primary to-secondary h-2"></div>
+            <CardHeader className="bg-gradient-to-br from-primary/5 to-secondary/5">
               <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Acesse sua conta</CardTitle>
               <CardDescription>
                 Entre com seu nome de usuário e senha para acessar o sistema.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <Form {...loginForm}>
                 <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                   <FormField
@@ -118,9 +119,13 @@ export default function AuthPage() {
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nome de usuário</FormLabel>
+                        <FormLabel className="text-primary font-medium">Nome de usuário</FormLabel>
                         <FormControl>
-                          <Input placeholder="nome_usuario" {...field} />
+                          <Input 
+                            placeholder="nome_usuario" 
+                            {...field}
+                            className="border-primary/20 focus-visible:ring-primary/30" 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -131,9 +136,14 @@ export default function AuthPage() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Senha</FormLabel>
+                        <FormLabel className="text-primary font-medium">Senha</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="******" {...field} />
+                          <Input 
+                            type="password" 
+                            placeholder="******" 
+                            {...field}
+                            className="border-primary/20 focus-visible:ring-primary/30" 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -141,7 +151,7 @@ export default function AuthPage() {
                   />
                   <Button 
                     type="submit" 
-                    className="w-full" 
+                    className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 border-0 mt-6" 
                     disabled={loginMutation.isPending}
                   >
                     {loginMutation.isPending ? (
@@ -156,8 +166,8 @@ export default function AuthPage() {
                 </form>
               </Form>
             </CardContent>
-            <CardFooter className="flex flex-col items-center justify-center">
-              <p className="text-sm text-muted-foreground">
+            <CardFooter className="flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 border-t border-primary/10">
+              <p className="text-sm text-primary/70">
                 Entre em contato com um administrador para criar sua conta.
               </p>
             </CardFooter>

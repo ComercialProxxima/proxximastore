@@ -60,7 +60,8 @@ import {
   UserPlus, 
   Pencil, 
   Trash2, 
-  MoreHorizontal
+  MoreHorizontal,
+  Award
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -448,12 +449,16 @@ export default function EmployeesPage() {
 
       {/* Dialog para adicionar xCoins */}
       <Dialog open={isPointsDialogOpen} onOpenChange={setIsPointsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Adicionar xCoins</DialogTitle>
-            <DialogDescription>
-              Adicione xCoins à conta de {selectedEmployee?.displayName || selectedEmployee?.username}.
-              Atualmente possui {selectedEmployee?.points || 0} xCoins.
+        <DialogContent className="border-primary/20 overflow-hidden">
+          <div className="bg-gradient-to-r from-primary to-secondary h-1 absolute top-0 left-0 right-0"></div>
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent flex items-center">
+              <Award className="h-5 w-5 mr-2 text-secondary" />
+              Adicionar xCoins
+            </DialogTitle>
+            <DialogDescription className="text-primary/70">
+              Adicione xCoins à conta de <span className="font-medium text-primary">{selectedEmployee?.displayName || selectedEmployee?.username}</span>.
+              Atualmente possui <span className="font-medium text-secondary">{selectedEmployee?.points || 0} xCoins</span>.
             </DialogDescription>
           </DialogHeader>
 
@@ -464,11 +469,16 @@ export default function EmployeesPage() {
                 name="points"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Quantidade de xCoins</FormLabel>
+                    <FormLabel className="text-primary font-medium">Quantidade de xCoins</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} min={1} />
+                      <Input 
+                        type="number" 
+                        {...field} 
+                        min={1} 
+                        className="border-primary/20 focus-visible:ring-primary/30"
+                      />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-primary/60">
                       Número de xCoins a serem adicionados
                     </FormDescription>
                     <FormMessage />
@@ -481,11 +491,15 @@ export default function EmployeesPage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descrição</FormLabel>
+                    <FormLabel className="text-primary font-medium">Descrição</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Ex: Participação em projeto" />
+                      <Input 
+                        {...field} 
+                        placeholder="Ex: Participação em projeto" 
+                        className="border-primary/20 focus-visible:ring-primary/30"
+                      />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-primary/60">
                       Motivo pelo qual os xCoins estão sendo adicionados
                     </FormDescription>
                     <FormMessage />
@@ -493,17 +507,19 @@ export default function EmployeesPage() {
                 )}
               />
 
-              <DialogFooter>
+              <DialogFooter className="mt-6">
                 <Button 
                   type="button" 
                   variant="outline" 
                   onClick={() => setIsPointsDialogOpen(false)}
+                  className="border-primary/20 text-primary hover:bg-primary/5"
                 >
                   Cancelar
                 </Button>
                 <Button 
                   type="submit" 
                   disabled={addPointsMutation.isPending}
+                  className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 border-0"
                 >
                   {addPointsMutation.isPending ? (
                     <>
@@ -511,7 +527,10 @@ export default function EmployeesPage() {
                       Adicionando...
                     </>
                   ) : (
-                    "Adicionar xCoins"
+                    <>
+                      <Award className="mr-2 h-4 w-4" />
+                      Adicionar xCoins
+                    </>
                   )}
                 </Button>
               </DialogFooter>

@@ -59,10 +59,21 @@ export default function Account() {
   
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormValues) => {
-      const res = await apiRequest("PATCH", "/api/protected/profile", data);
-      return await res.json();
+      console.log("Enviando dados para o servidor:", data);
+      try {
+        const res = await apiRequest("PATCH", "/api/protected/profile", data);
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || "Erro ao atualizar o perfil");
+        }
+        return await res.json();
+      } catch (error) {
+        console.error("Erro na requisição:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
+      console.log("Perfil atualizado com sucesso");
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
         title: "Perfil atualizado",
@@ -75,17 +86,21 @@ export default function Account() {
         confirmPassword: "",
       });
       setImagePreview(null);
+      setIsRemoving(false);
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
+      console.error("Erro completo:", error);
       toast({
         title: "Erro ao atualizar perfil",
-        description: error.message,
+        description: error.message || "Ocorreu um erro ao atualizar seu perfil. Verifique sua senha atual.",
         variant: "destructive",
       });
     },
   });
   
   const onSubmit = (data: ProfileFormValues) => {
+    console.log("Formulário enviado com dados:", data);
+    
     // Se o usuário fez upload de uma imagem, incluímos o preview no envio
     if (imagePreview) {
       data.profileImageUrl = imagePreview;
@@ -96,6 +111,23 @@ export default function Account() {
       data.profileImageUrl = null;
     }
     
+    // Mostrar toast antes de enviar
+    toast({
+      title: "Processando...",
+      description: "Enviando as alterações para o servidor",
+    });
+    
+    // Verificar se temos todos os campos necessários
+    if (!data.currentPassword) {
+      toast({
+        title: "Campo obrigatório",
+        description: "A senha atual é necessária para salvar as alterações",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Enviar dados
     updateProfileMutation.mutate(data);
   };
 

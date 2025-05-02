@@ -552,12 +552,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Rota para atualizar o perfil do usuário
   app.patch("/api/protected/profile", async (req: Request, res: Response) => {
+    console.log("Recebida solicitação para atualizar perfil:", req.body);
+    
     try {
+      if (!req.isAuthenticated() || !req.user) {
+        console.log("Usuário não autenticado");
+        return res.status(401).json({ message: "Não autenticado" });
+      }
+      
       const { displayName, currentPassword, newPassword, unit, profileImageUrl } = req.body;
+      
+      console.log("Dados recebidos: ", {
+        displayName, 
+        unit, 
+        profileImageUrl: profileImageUrl ? "[imagem recebida]" : null,
+        hasCurrentPassword: !!currentPassword,
+        hasNewPassword: !!newPassword
+      });
+      
+      if (!currentPassword) {
+        return res.status(400).json({ message: "Senha atual é obrigatória" });
+      }
       
       // Verificar a senha atual
       const user = await storage.getUser(req.user.id);
       if (!user) {
+        console.log("Usuário não encontrado ID:", req.user.id);
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
       
@@ -567,6 +587,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Comparar senha atual
       const passwordValid = await comparePasswords(currentPassword, user.password);
       if (!passwordValid) {
+        console.log("Senha atual incorreta");
         return res.status(400).json({ message: "Senha atual incorreta" });
       }
       
@@ -577,15 +598,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (unit !== undefined) updateData.unit = unit;
       if (profileImageUrl !== undefined) updateData.profileImageUrl = profileImageUrl;
       
+      console.log("Dados para atualização:", {
+        ...updateData,
+        password: updateData.password ? "[senha encriptada]" : undefined,
+        profileImageUrl: updateData.profileImageUrl ? "[imagem]" : null
+      });
+      
       // Atualizar usuário
       const updatedUser = await storage.updateUser(req.user.id, updateData);
       if (!updatedUser) {
+        console.log("Falha ao atualizar usuário");
         return res.status(404).json({ message: "Não foi possível atualizar o usuário" });
       }
       
       // Não enviar hash de senha para o cliente
       const { password, ...userWithoutPassword } = updatedUser;
       
+      console.log("Perfil atualizado com sucesso");
       res.json(userWithoutPassword);
     } catch (error) {
       console.error("Erro ao atualizar perfil:", error);

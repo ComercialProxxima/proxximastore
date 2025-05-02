@@ -16,7 +16,6 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email").notNull(),
   displayName: text("display_name"),
-  profileImageUrl: text("profile_image_url"),
   role: text("role", { enum: ["admin", "employee"] }).notNull().default(UserRoleEnum.EMPLOYEE),
   points: integer("points").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
@@ -112,7 +111,6 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   email: true,
   displayName: true,
-  profileImageUrl: true,
   role: true,
   points: true,
 });
@@ -166,7 +164,6 @@ export const updateUserSchema = z.object({
   email: z.string().email().optional(),
   points: z.number().int().optional(),
   role: z.enum([UserRoleEnum.ADMIN, UserRoleEnum.EMPLOYEE]).optional(),
-  profileImageUrl: z.string().url().optional().nullable(),
 });
 
 // Type Exports

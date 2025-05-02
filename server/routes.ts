@@ -22,14 +22,7 @@ import { z } from "zod";
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      let uploadDir = path.join(import.meta.dirname, "..", "uploads");
-      
-      // Define subdirectories based on file purpose
-      if (file.fieldname === 'profileImage') {
-        uploadDir = path.join(uploadDir, 'profile_images');
-      } else if (file.fieldname === 'image') {
-        uploadDir = path.join(uploadDir, 'products');
-      }
+      const uploadDir = path.join(import.meta.dirname, "..", "uploads");
       
       // Create the uploads directory if it doesn't exist
       if (!fs.existsSync(uploadDir)) {
@@ -82,17 +75,6 @@ function isAdmin(req: Request, res: Response, next: NextFunction) {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
-
-  // Servir arquivos estáticos da pasta uploads
-  app.use("/uploads", (req, res, next) => {
-    const filePath = path.join(import.meta.dirname, "..", "uploads", req.path);
-    fs.access(filePath, fs.constants.F_OK, (err) => {
-      if (err) {
-        return next();
-      }
-      res.sendFile(filePath);
-    });
-  });
 
   // -------------------------
   // USER ROUTES
@@ -569,7 +551,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Rota para atualizar o perfil do usuário
-  app.patch("/api/protected/profile", upload.single('profileImage'), async (req: Request, res: Response) => {
+  app.patch("/api/protected/profile", async (req: Request, res: Response) => {
     try {
       const { displayName, currentPassword, newPassword } = req.body;
       
@@ -579,56 +561,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
       
+      // Importar funções de autenticação
+      const { comparePasswords, hashPassword } = await import("./auth");
+      
+      // Comparar senha atual
+      const passwordValid = await comparePasswords(currentPassword, user.password);
+      if (!passwordValid) {
+        return res.status(400).json({ message: "Senha atual incorreta" });
+      }
+      
       // Preparar dados de atualização
       const updateData: any = {};
-      
-      // Se estiver atualizando a senha, verificar a senha atual
-      if (newPassword) {
-        // Importar funções de autenticação
-        const { comparePasswords, hashPassword } = await import("./auth");
-        
-        // Se estiver mudando a senha, a senha atual é obrigatória
-        if (!currentPassword) {
-          return res.status(400).json({ message: "Senha atual é obrigatória para alterar a senha" });
-        }
-        
-        // Verificar se a senha atual está correta
-        const passwordValid = await comparePasswords(currentPassword, user.password);
-        if (!passwordValid) {
-          return res.status(400).json({ message: "Senha atual incorreta" });
-        }
-        
-        // Definir a nova senha
-        updateData.password = await hashPassword(newPassword);
-      }
-      
-      // Definir nome de exibição se fornecido
-      if (displayName !== undefined) {
-        updateData.displayName = displayName;
-      }
-      
-      // Se tiver uma nova imagem de perfil
-      if (req.file) {
-        // Salvar a URL relativa da imagem no banco de dados
-        updateData.profileImageUrl = `/uploads/profile_images/${req.file.filename}`;
-        
-        // Remover a imagem antiga se existir
-        if (user.profileImageUrl) {
-          const oldImagePath = path.join(import.meta.dirname, "..", "public", user.profileImageUrl);
-          if (fs.existsSync(oldImagePath)) {
-            try {
-              fs.unlinkSync(oldImagePath);
-            } catch (err) {
-              console.error("Erro ao remover imagem antiga:", err);
-            }
-          }
-        }
-      }
-      
-      // Verificar se há algo para atualizar
-      if (Object.keys(updateData).length === 0) {
-        return res.status(400).json({ message: "Nenhum dado para atualizar foi fornecido" });
-      }
+      if (displayName !== undefined) updateData.displayName = displayName;
+      if (newPassword) updateData.password = await hashPassword(newPassword);
       
       // Atualizar usuário
       const updatedUser = await storage.updateUser(req.user.id, updateData);

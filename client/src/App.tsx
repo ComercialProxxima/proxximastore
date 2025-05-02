@@ -27,54 +27,52 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          <div className="min-h-screen flex flex-col">
-            <main className="flex-grow">
-              <Switch>
-                {/* Rota de autenticação (pública) */}
-                <Route path="/auth" component={AuthPage} />
-                
-                {/* Rotas protegidas (apenas usuários autenticados) */}
-                <Route path="/">
-                  {() => {
-                    const { user, isLoading } = useAuth();
-                    
-                    if (isLoading) {
-                      return (
-                        <div className="flex items-center justify-center min-h-screen">
-                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        </div>
-                      );
-                    }
-                    
-                    if (!user) {
-                      return <Redirect to="/auth" />;
-                    }
-                    
-                    // Se for admin, redireciona para o dashboard admin, senão para a página de produtos
-                    if (user.role === "admin") {
-                      return <Redirect to="/admin" />;
-                    } else {
-                      return <ProductsPage />;
-                    }
-                  }}
-                </Route>
-                <ProtectedRoute path="/products" component={ProductsPage} />
-                <ProtectedRoute path="/checkout/:id" component={CheckoutPage} />
-                <ProtectedRoute path="/my-points" component={MyPointsPage} />
-                <ProtectedRoute path="/my-orders" component={MyOrdersPage} />
-                <ProtectedRoute path="/my-orders/:id" component={OrderDetailPage} />
-                <ProtectedRoute path="/account" component={ProfilePage} />
-                
-                {/* Rotas administrativas (apenas administradores) */}
-                <AdminRoute path="/admin" component={AdminDashboard} />
-                <AdminRoute path="/admin/products" component={AdminProductsPage} />
-                <AdminRoute path="/admin/employees" component={EmployeesPage} />
-                <AdminRoute path="/admin/orders" component={OrdersPage} />
-                
-                {/* Página não encontrada */}
-                <Route component={NotFound} />
-              </Switch>
-            </main>
+          <div className="min-h-screen bg-background">
+            <Switch>
+              {/* Rota de autenticação (pública) */}
+              <Route path="/auth" component={AuthPage} />
+              
+              {/* Rotas protegidas (apenas usuários autenticados) */}
+              <Route path="/">
+                {() => {
+                  const { user, isLoading } = useAuth();
+                  
+                  if (isLoading) {
+                    return (
+                      <div className="flex items-center justify-center min-h-screen">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      </div>
+                    );
+                  }
+                  
+                  if (!user) {
+                    return <Redirect to="/auth" />;
+                  }
+                  
+                  // Se for admin, redireciona para o dashboard admin, senão para a página de produtos
+                  if (user.role === "admin") {
+                    return <Redirect to="/admin" />;
+                  } else {
+                    return <ProductsPage />;
+                  }
+                }}
+              </Route>
+              <ProtectedRoute path="/products" component={ProductsPage} />
+              <ProtectedRoute path="/checkout/:id" component={CheckoutPage} />
+              <ProtectedRoute path="/my-points" component={MyPointsPage} />
+              <ProtectedRoute path="/my-orders" component={MyOrdersPage} />
+              <ProtectedRoute path="/my-orders/:id" component={OrderDetailPage} />
+              <ProtectedRoute path="/account" component={ProfilePage} />
+              
+              {/* Rotas administrativas (apenas administradores) */}
+              <AdminRoute path="/admin" component={AdminDashboard} />
+              <AdminRoute path="/admin/products" component={AdminProductsPage} />
+              <AdminRoute path="/admin/employees" component={EmployeesPage} />
+              <AdminRoute path="/admin/orders" component={OrdersPage} />
+              
+              {/* Página não encontrada */}
+              <Route component={NotFound} />
+            </Switch>
           </div>
           <Toaster />
         </TooltipProvider>

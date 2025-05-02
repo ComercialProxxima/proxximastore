@@ -16,6 +16,8 @@ export type User = {
   displayName: string | null;
   role: typeof UserRoleEnum.ADMIN | typeof UserRoleEnum.EMPLOYEE;
   points: number;
+  unit: string | null;
+  profileImageUrl: string | null;
   createdAt: string | null;
   updatedAt: string | null;
 };

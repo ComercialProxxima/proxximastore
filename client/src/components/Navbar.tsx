@@ -132,14 +132,18 @@ export default function Navbar() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback>{getInitials()}</AvatarFallback>
+                  {user?.profileImageUrl ? (
+                    <AvatarImage src={user.profileImageUrl} alt="Foto de perfil" />
+                  ) : (
+                    <AvatarFallback>{getInitials()}</AvatarFallback>
+                  )}
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/profile")}>
+              <DropdownMenuItem onClick={() => navigate("/account")}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Perfil</span>
               </DropdownMenuItem>
@@ -175,12 +179,21 @@ export default function Navbar() {
               <div className="py-4 space-y-4">
                 <div className="flex items-center space-x-2 mb-6">
                   <Avatar>
-                    <AvatarFallback>{getInitials()}</AvatarFallback>
+                    {user?.profileImageUrl ? (
+                      <AvatarImage src={user.profileImageUrl} alt="Foto de perfil" />
+                    ) : (
+                      <AvatarFallback>{getInitials()}</AvatarFallback>
+                    )}
                   </Avatar>
                   <div>
                     <p className="text-sm font-medium">{user?.displayName || user?.username}</p>
                     <p className="text-xs text-muted-foreground">{user?.email}</p>
-                    <p className="text-xs font-medium mt-1">Pontos: {user?.points || 0}</p>
+                    <p className="text-xs font-medium mt-1">xCoins: {user?.points || 0}</p>
+                    {user?.unit && (
+                      <p className="text-xs bg-muted px-1 py-0.5 mt-1 rounded-sm inline-block">
+                        {user.unit}
+                      </p>
+                    )}
                   </div>
                 </div>
                 
@@ -206,7 +219,7 @@ export default function Navbar() {
                     </div>
                   </Link>
                   
-                  <Link href="/profile">
+                  <Link href="/account">
                     <div className="flex items-center py-2 px-1 rounded-md hover:bg-primary/10 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
                       <User className="mr-2 h-5 w-5 text-secondary" />
                       Meu Perfil

@@ -15,6 +15,7 @@ import MyOrdersPage from "@/pages/MyOrdersPage";
 import OrderDetailPage from "@/pages/OrderDetailPage";
 import CheckoutPage from "@/pages/CheckoutPage";
 import Account from "@/pages/Account";
+import ProfilePage from "@/pages/ProfilePage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminProductsPage from "@/pages/admin/ProductsPage";
 import EmployeesPage from "@/pages/admin/EmployeesPage";
@@ -37,7 +38,7 @@ function App() {
                 <ProtectedRoute path="/my-points" component={MyPointsPage} />
                 <ProtectedRoute path="/my-orders" component={MyOrdersPage} />
                 <ProtectedRoute path="/my-orders/:id" component={OrderDetailPage} />
-                <ProtectedRoute path="/account" component={Account} />
+                <ProtectedRoute path="/account" component={ProfilePage} />
                 
                 {/* Rotas administrativas (apenas administradores) */}
                 <AdminRoute path="/admin" component={AdminDashboard} />

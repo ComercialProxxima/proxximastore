@@ -78,10 +78,10 @@ export default function Sidebar() {
       active: location === "/" || (isAdmin && location === "/admin")
     },
     {
-      href: "/",
+      href: "/products",
       icon: <Package className="h-5 w-5" />,
       label: "Produtos",
-      active: !isAdmin && location === "/"
+      active: location === "/products"
     },
     {
       href: "/my-points",

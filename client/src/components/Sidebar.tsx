@@ -75,14 +75,14 @@ export default function Sidebar() {
       href: isAdmin ? "/admin" : "/",
       icon: isAdmin ? <LayoutDashboard className="h-5 w-5" /> : <Package className="h-5 w-5" />,
       label: isAdmin ? "Dashboard" : "Produtos",
-      active: location === "/" || (isAdmin && location === "/admin")
+      active: !isAdmin && location === "/" || (isAdmin && location === "/admin")
     },
-    {
+    ...(isAdmin ? [{
       href: "/products",
       icon: <Package className="h-5 w-5" />,
       label: "Produtos",
       active: location === "/products"
-    },
+    }] : []),
     {
       href: "/my-points",
       icon: <Award className="h-5 w-5" />,

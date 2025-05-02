@@ -22,16 +22,15 @@ const profileSchema = z.object({
   confirmPassword: z.string().optional(),
 }).refine((data) => {
   // Se o usuário estiver tentando alterar a senha
-  if (data.newPassword || data.confirmPassword) {
+  if (data.newPassword && data.confirmPassword) {
     // Verificar se as senhas coincidem
-    if (data.newPassword !== data.confirmPassword) return false;
-    
-    // Se estiver tentando definir uma nova senha, a senha atual deve ser fornecida
-    if (data.newPassword && !data.currentPassword) return false;
+    if (data.newPassword !== data.confirmPassword) {
+      return false;
+    }
   }
   return true;
 }, {
-  message: "As senhas não coincidem ou senha atual não fornecida",
+  message: "As senhas não coincidem",
   path: ["confirmPassword"]
 });
 
@@ -53,7 +52,21 @@ export default function Account() {
   
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormValues) => {
-      const res = await apiRequest("PATCH", "/api/protected/profile", data);
+      // Vamos enviar apenas os campos preenchidos
+      const payload: any = {};
+      
+      // Adiciona apenas displayName se for diferente do atual e tiver pelo menos 3 caracteres
+      if (data.displayName && data.displayName.length >= 3 && data.displayName !== user?.displayName) {
+        payload.displayName = data.displayName;
+      }
+      
+      // Se estiver tentando alterar a senha
+      if (data.newPassword) {
+        payload.newPassword = data.newPassword;
+        payload.currentPassword = data.currentPassword;
+      }
+      
+      const res = await apiRequest("PATCH", "/api/protected/profile", payload);
       return await res.json();
     },
     onSuccess: () => {
@@ -70,15 +83,48 @@ export default function Account() {
       });
     },
     onError: (error: Error) => {
+      // Mensagens de erro personalizadas
+      let message = error.message;
+      
+      if (error.message.includes("Senha atual incorreta")) {
+        message = "A senha atual está incorreta. Se você deseja alterar apenas o nome, deixe os campos de senha em branco.";
+      } else if (error.message.includes("Senha atual é necessária")) {
+        message = "Para alterar sua senha, é necessário informar sua senha atual.";
+      }
+      
       toast({
         title: "Erro ao atualizar perfil",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     },
   });
   
   const onSubmit = (data: ProfileFormValues) => {
+    // Verificar se há alterações para submeter
+    const hasDisplayNameChange = data.displayName && data.displayName.length >= 3 && data.displayName !== user?.displayName;
+    const hasPasswordChange = !!data.newPassword;
+    
+    // Se não houver alterações, mostrar uma mensagem
+    if (!hasDisplayNameChange && !hasPasswordChange) {
+      toast({
+        title: "Nenhuma alteração detectada",
+        description: "Faça alterações no nome de exibição ou na senha para salvar.",
+        variant: "default",
+      });
+      return;
+    }
+    
+    // Se houver tentativa de alteração de senha sem informar senha atual
+    if (hasPasswordChange && !data.currentPassword) {
+      toast({
+        title: "Senha atual necessária",
+        description: "Para alterar sua senha, você precisa informar sua senha atual.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     updateProfileMutation.mutate(data);
   };
   

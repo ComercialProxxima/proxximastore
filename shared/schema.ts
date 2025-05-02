@@ -18,6 +18,8 @@ export const users = pgTable("users", {
   displayName: text("display_name"),
   role: text("role", { enum: ["admin", "employee"] }).notNull().default(UserRoleEnum.EMPLOYEE),
   points: integer("points").notNull().default(0),
+  unit: text("unit"),
+  profileImageUrl: text("profile_image_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -164,6 +166,8 @@ export const updateUserSchema = z.object({
   email: z.string().email().optional(),
   points: z.number().int().optional(),
   role: z.enum([UserRoleEnum.ADMIN, UserRoleEnum.EMPLOYEE]).optional(),
+  unit: z.string().optional(),
+  profileImageUrl: z.string().optional(),
 });
 
 // Type Exports

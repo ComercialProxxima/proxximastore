@@ -463,7 +463,7 @@ export default function AdminProductsPage() {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onCreateSubmit)}
-              className="space-y-4"
+              className="space-y-4 overflow-y-auto max-h-[60vh] pr-1"
             >
               <FormField
                 control={form.control}
@@ -627,7 +627,7 @@ export default function AdminProductsPage() {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onEditSubmit)}
-              className="space-y-4"
+              className="space-y-4 overflow-y-auto max-h-[60vh] pr-1"
             >
               <FormField
                 control={form.control}

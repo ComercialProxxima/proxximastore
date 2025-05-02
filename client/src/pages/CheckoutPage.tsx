@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { Product } from "@shared/schema";
 import Layout from "@/components/Layout";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import {
@@ -54,7 +55,7 @@ export default function CheckoutPage() {
     data: product,
     isLoading,
     error,
-  } = useQuery({
+  } = useQuery<Product>({
     queryKey: [`/api/products/${productId}`]
   });
   

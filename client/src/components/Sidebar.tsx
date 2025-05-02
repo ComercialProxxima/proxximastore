@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Package, 
   ShoppingCart, 
+  ShoppingBag,
+  Store,
   Menu,
   X, 
   User, 
@@ -152,17 +154,21 @@ export default function Sidebar() {
           {/* Header com logo */}
           <div className={`p-4 ${isCollapsed ? 'items-center justify-center' : 'flex justify-center'} border-b border-white/20 relative`}>
             <Link href={isAdmin ? "/admin" : "/"} className="flex items-center justify-center mx-auto">
-              <div className={`flex ${isCollapsed ? 'justify-center' : 'flex-col'} cursor-pointer items-center`}>
-                <Package className="h-6 w-6 text-secondary mx-auto" />
-                {!isCollapsed && (
-                  <div className="flex flex-col mt-2 text-center">
-                    <span className="font-bold text-lg text-white">
-                      Proxxima
-                    </span>
-                    <span className="font-bold text-lg text-white">
-                      Store
-                    </span>
-                  </div>
+              <div className={`flex ${isCollapsed ? 'justify-center' : 'flex-row items-center'} cursor-pointer`}>
+                {isCollapsed ? (
+                  <ShoppingBag className="h-6 w-6 text-secondary mx-auto" />
+                ) : (
+                  <>
+                    <div className="flex flex-col mr-2">
+                      <span className="font-bold text-lg text-white">
+                        Proxxima
+                      </span>
+                      <span className="font-bold text-lg text-white">
+                        Store
+                      </span>
+                    </div>
+                    <ShoppingBag className="h-6 w-6 text-secondary" />
+                  </>
                 )}
               </div>
             </Link>

@@ -58,7 +58,7 @@ export default function Navbar() {
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo e nome da aplicação */}
         <div className="flex items-center space-x-2">
-          <Link href="/">
+          <Link href={isAdmin ? "/admin" : "/"}>
             <div className="flex items-center space-x-2 cursor-pointer">
               <Package className="h-6 w-6 text-secondary" /> {/* Rosa #E6007D */}
               <span className="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Proxxima Store</span> {/* Gradiente do azul #2C2C83 para rosa #E6007D */}
@@ -73,11 +73,11 @@ export default function Navbar() {
 
         {/* Menu para desktop */}
         <div className="hidden md:flex items-center space-x-6">
-          <Link href="/">
+          <Link href={isAdmin ? "/admin" : "/"}>
             <div className={`text-sm font-medium transition-colors hover:text-primary cursor-pointer ${
-              location === "/" ? "text-primary" : "text-muted-foreground"
+              location === "/" || (isAdmin && location === "/admin") ? "text-primary" : "text-muted-foreground"
             }`}>
-              Produtos
+              {isAdmin ? "Dashboard" : "Produtos"}
             </div>
           </Link>
           
@@ -198,10 +198,10 @@ export default function Navbar() {
                 </div>
                 
                 <nav className="flex flex-col space-y-3">
-                  <Link href="/">
+                  <Link href={isAdmin ? "/admin" : "/"}>
                     <div className="flex items-center py-2 px-1 rounded-md hover:bg-primary/10 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
                       <Package className="mr-2 h-5 w-5 text-secondary" />
-                      Produtos
+                      {isAdmin ? "Dashboard" : "Produtos"}
                     </div>
                   </Link>
                   

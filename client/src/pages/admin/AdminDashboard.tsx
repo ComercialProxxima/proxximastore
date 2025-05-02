@@ -61,9 +61,9 @@ export default function AdminDashboard() {
     queryKey: ["/api/products"],
   });
 
-  // Buscar pedidos (precisaria criar um endpoint específico para admin)
+  // Buscar todos os pedidos usando o endpoint de admin
   const { data: recentOrders, isLoading: isLoadingOrders } = useQuery<Order[]>({
-    queryKey: ["/api/protected/orders"],
+    queryKey: ["/api/admin/orders"],
   });
 
   // Função para formatar data

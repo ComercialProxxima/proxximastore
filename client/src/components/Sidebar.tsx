@@ -45,11 +45,11 @@ export default function Sidebar() {
   // Determinar estilo da barra lateral com base no estado
   const sidebarClass = `
     ${isMobile ? 
-      `fixed inset-y-0 left-0 z-50 bg-background border-r transform ${
+      `fixed inset-y-0 left-0 z-50 bg-primary/5 border-r border-primary/20 transform ${
         isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
       } transition-transform duration-200 ease-in-out w-64` 
       : 
-      `min-h-screen sticky top-0 border-r ${
+      `min-h-screen sticky top-0 border-r border-primary/20 bg-primary/5 ${
         isCollapsed ? 'w-20' : 'w-64'
       } transition-all duration-300 ease-in-out`
     }
@@ -129,12 +129,15 @@ export default function Sidebar() {
       <div 
         className={`
           flex items-center py-3 px-4 rounded-md cursor-pointer
-          ${item.active ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'}
+          ${item.active ? 
+            'bg-secondary/10 text-secondary border-l-4 border-secondary font-semibold' : 
+            'hover:bg-primary/10 text-muted-foreground hover:text-foreground border-l-4 border-transparent'
+          }
           ${className}
         `}
         onClick={() => isMobile && setIsMobileMenuOpen(false)}
       >
-        <div className={`${isCollapsed ? 'mx-auto' : 'mr-3'} text-secondary`}>
+        <div className={`${isCollapsed ? 'mx-auto' : 'mr-3'} ${item.active ? 'text-secondary' : 'text-primary/70'}`}>
           {item.icon}
         </div>
         {!isCollapsed && <span className="font-medium">{item.label}</span>}
@@ -148,7 +151,7 @@ export default function Sidebar() {
       <div className={sidebarClass}>
         <div className="flex flex-col h-full">
           {/* Header com logo */}
-          <div className={`p-4 ${isCollapsed ? 'items-center justify-center' : ''} flex border-b`}>
+          <div className={`p-4 ${isCollapsed ? 'items-center justify-center' : ''} flex border-b border-primary/30 bg-gradient-to-r from-primary/20 to-secondary/10`}>
             <Link href={isAdmin ? "/admin" : "/"}>
               <div className={`flex ${isCollapsed ? 'justify-center' : 'items-center space-x-2'} cursor-pointer`}>
                 <Package className="h-6 w-6 text-secondary" />
@@ -163,7 +166,7 @@ export default function Sidebar() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="ml-auto"
+                className="ml-auto text-primary hover:text-secondary hover:bg-secondary/10"
                 onClick={() => setIsCollapsed(!isCollapsed)}
               >
                 {isCollapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
@@ -172,33 +175,43 @@ export default function Sidebar() {
           </div>
 
           {/* Perfil do usuário */}
-          <div className={`px-4 py-6 border-b ${isCollapsed ? 'text-center' : ''}`}>
+          <div className={`px-4 py-6 border-b border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5 ${isCollapsed ? 'text-center' : ''}`}>
             <div className={`${isCollapsed ? 'flex flex-col items-center' : 'flex items-center space-x-3'}`}>
-              <Avatar className={`${isCollapsed ? 'mx-auto mb-3' : ''} h-10 w-10`}>
+              <Avatar className={`${isCollapsed ? 'mx-auto mb-3' : ''} h-10 w-10 ring-2 ring-secondary/30 ring-offset-2 ring-offset-primary/5`}>
                 {user?.profileImageUrl ? (
                   <AvatarImage src={user.profileImageUrl} alt="Foto de perfil" />
                 ) : (
-                  <AvatarFallback>{getInitials()}</AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
+                    {getInitials()}
+                  </AvatarFallback>
                 )}
               </Avatar>
               {!isCollapsed && (
                 <div>
-                  <p className="font-medium text-sm">{user?.displayName || user?.username}</p>
+                  <p className="font-medium text-sm text-primary">{user?.displayName || user?.username}</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                   {user?.unit && (
-                    <p className="text-xs mt-1 bg-muted inline-block px-2 py-0.5 rounded-sm">
+                    <p className="text-xs mt-1 bg-primary/10 text-primary inline-block px-2 py-0.5 rounded-sm">
                       {user.unit}
                     </p>
                   )}
                   <div className="flex items-center mt-1">
                     <Award className="w-4 h-4 mr-1 text-secondary" />
-                    <span className="text-xs font-medium">{user?.points || 0} pontos</span>
+                    <span className="text-xs font-medium bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      {user?.points || 0} xCoins
+                    </span>
                   </div>
                   {isAdmin && <Badge variant="secondary" className="mt-2">Admin</Badge>}
                 </div>
               )}
               {isCollapsed && isAdmin && (
                 <Badge variant="secondary" className="mt-1">Admin</Badge>
+              )}
+              {isCollapsed && (
+                <div className="flex items-center mt-1">
+                  <Award className="w-4 h-4 mr-1 text-secondary" />
+                  <span className="text-xs font-medium">{user?.points || 0}</span>
+                </div>
               )}
             </div>
           </div>
@@ -225,13 +238,15 @@ export default function Sidebar() {
           </div>
 
           {/* Botão de logout */}
-          <div className="p-4 border-t">
+          <div className="p-4 border-t border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
             <Button 
-              variant="ghost" 
-              className={`${isCollapsed ? 'justify-center w-full p-2' : 'justify-start w-full'}`}
+              variant="outline" 
+              className={`${isCollapsed ? 'justify-center w-full p-2' : 'justify-start w-full'} 
+                border-primary/20 hover:border-secondary/50 hover:bg-secondary/10 hover:text-secondary
+                transition-all duration-300`}
               onClick={handleLogout}
             >
-              <LogOut className={`${isCollapsed ? '' : 'mr-2'} h-5 w-5`} />
+              <LogOut className={`${isCollapsed ? '' : 'mr-2'} h-5 w-5 text-primary group-hover:text-secondary`} />
               {!isCollapsed && <span>Sair</span>}
             </Button>
           </div>

@@ -8,13 +8,13 @@
      Rosa: #E6007D (HSL: 328 100% 45%)
      Branco: #FFFFFF (HSL: 0 0% 100%)
   */
-  --background: 0 0% 100%; /* Branco */
+  --background: 240 49% 97%; /* Azul bem claro, quase branco */
   --foreground: 240 49% 34%; /* Azul escuro */
   --muted: 240 30% 96%;
   --muted-foreground: 240 49% 25%;
   --popover: 0 0% 100%; /* Branco */
   --popover-foreground: 240 49% 34%; /* Azul escuro */
-  --card: 0 0% 100%; /* Branco */
+  --card: 240 49% 99%; /* Azul muito claro para cartões */
   --card-foreground: 240 49% 34%; /* Azul escuro */
   --border: 240 33% 90%;
   --input: 240 33% 90%;

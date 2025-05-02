@@ -343,39 +343,49 @@ export default function EmployeesPage() {
     <Layout>
       <div className="container mx-auto py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Gerenciar Funcionários</h1>
-          <Button onClick={() => setIsRegisterDialogOpen(true)}>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Gerenciar Funcionários
+          </h1>
+          <Button onClick={() => setIsRegisterDialogOpen(true)} 
+            className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 border-0">
             <UserPlus className="h-4 w-4 mr-2" />
             Adicionar Funcionário
           </Button>
         </div>
 
         {employees && employees.length > 0 ? (
-          <Card>
+          <Card className="border-primary/20 overflow-hidden shadow-md">
+            <div className="bg-gradient-to-r from-primary to-secondary h-2"></div>
             <CardContent className="p-0">
               <Table>
                 <TableCaption>Lista de funcionários da empresa</TableCaption>
-                <TableHeader>
+                <TableHeader className="bg-primary/5">
                   <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Função</TableHead>
-                    <TableHead>xCoins</TableHead>
-                    <TableHead>Data de Registro</TableHead>
-                    <TableHead>Ações</TableHead>
+                    <TableHead className="text-primary">Nome</TableHead>
+                    <TableHead className="text-primary">Email</TableHead>
+                    <TableHead className="text-primary">Função</TableHead>
+                    <TableHead className="text-primary">xCoins</TableHead>
+                    <TableHead className="text-primary">Data de Registro</TableHead>
+                    <TableHead className="text-primary">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {employees.map((employee) => (
-                    <TableRow key={employee.id}>
+                  {employees.map((employee, index) => (
+                    <TableRow key={employee.id} className={index % 2 === 0 ? "bg-primary/[0.02]" : ""}>
                       <TableCell className="font-medium">{employee.displayName || employee.username}</TableCell>
                       <TableCell>{employee.email}</TableCell>
                       <TableCell>
-                        <Badge variant={employee.role === UserRoleEnum.ADMIN ? "default" : "outline"}>
+                        <Badge variant={employee.role === UserRoleEnum.ADMIN ? "secondary" : "outline"}
+                          className={employee.role === UserRoleEnum.ADMIN ? "" : "border-primary/30 text-primary"}>
                           {employee.role === UserRoleEnum.ADMIN ? "Administrador" : "Funcionário"}
                         </Badge>
                       </TableCell>
-                      <TableCell>{employee.points} xCoins</TableCell>
+                      <TableCell>
+                        <span className="flex items-center">
+                          <Award className="h-4 w-4 mr-1 text-secondary" />
+                          <span className="font-medium">{employee.points}</span>
+                        </span>
+                      </TableCell>
                       <TableCell>
                         {employee.createdAt ? 
                           format(new Date(employee.createdAt), "dd/MM/yyyy", { locale: ptBR }) : 
@@ -387,6 +397,7 @@ export default function EmployeesPage() {
                             variant="outline" 
                             size="sm" 
                             onClick={() => handleOpenPointsDialog(employee)}
+                            className="border-secondary/30 text-secondary hover:bg-secondary/10 hover:text-secondary"
                           >
                             <PlusCircle className="h-4 w-4 mr-1" />
                             Adicionar xCoins
@@ -394,21 +405,21 @@ export default function EmployeesPage() {
                           
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" className="hover:bg-primary/10 hover:text-primary">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                              <DropdownMenuLabel className="text-primary">Ações</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleOpenEditDialog(employee)}>
-                                <Pencil className="h-4 w-4 mr-2" />
+                              <DropdownMenuItem onClick={() => handleOpenEditDialog(employee)} className="text-primary hover:text-primary">
+                                <Pencil className="h-4 w-4 mr-2 text-primary" />
                                 Editar
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 onClick={() => handleOpenDeleteDialog(employee)}
                                 disabled={currentUser?.id === employee.id} // Impedir exclusão do próprio usuário
-                                className={currentUser?.id === employee.id ? "text-gray-400" : "text-red-600"}
+                                className={currentUser?.id === employee.id ? "text-gray-400" : "text-destructive hover:text-destructive"}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Excluir

@@ -555,59 +555,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { displayName, currentPassword, newPassword } = req.body;
       
-      // Buscar usuário
+      // Verificar a senha atual
       const user = await storage.getUser(req.user.id);
       if (!user) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
       
+      // Importar funções de autenticação
+      const { comparePasswords, hashPassword } = await import("./auth");
+      
+      // Comparar senha atual
+      const passwordValid = await comparePasswords(currentPassword, user.password);
+      if (!passwordValid) {
+        return res.status(400).json({ message: "Senha atual incorreta" });
+      }
+      
       // Preparar dados de atualização
       const updateData: any = {};
-      
-      // Primeiro caso: atualização de nome sem alterar senha
-      // Atualizar displayName se fornecido, sem precisar de senha
-      if (displayName !== undefined) {
-        updateData.displayName = displayName;
-      }
-      
-      // Segundo caso: o usuário está tentando mudar a senha
-      if (newPassword) {
-        // Importar funções de autenticação
-        const { comparePasswords, hashPassword } = await import("./auth");
-        
-        // Verificar se a senha atual foi fornecida
-        if (!currentPassword) {
-          // Se estiver tentando alterar a senha sem fornecer a senha atual
-          // mas já tiver outros campos para atualizar (como displayName),
-          // atualizamos apenas os outros campos e ignoramos a alteração de senha
-          if (Object.keys(updateData).length > 0) {
-            console.log("Ignorando alteração de senha pois senha atual não foi fornecida");
-          } else {
-            return res.status(400).json({ message: "Senha atual é necessária para alterar a senha" });
-          }
-        } else {
-          // Se forneceu senha atual, verificamos
-          const passwordValid = await comparePasswords(currentPassword, user.password);
-          if (!passwordValid) {
-            // Se senha atual estiver incorreta mas tiver outros campos para atualizar,
-            // atualizamos apenas os outros campos e ignoramos a alteração de senha
-            if (Object.keys(updateData).length > 0) {
-              console.log("Ignorando alteração de senha pois senha atual está incorreta");
-            } else {
-              return res.status(400).json({ message: "Senha atual incorreta" });
-            }
-          } else {
-            // Senha atual correta, podemos atualizar a senha
-            updateData.password = await hashPassword(newPassword);
-          }
-        }
-      }
-      
-      // Se não houver nada para atualizar, retornar o usuário atual
-      if (Object.keys(updateData).length === 0) {
-        const { password, ...userWithoutPassword } = user;
-        return res.json(userWithoutPassword);
-      }
+      if (displayName !== undefined) updateData.displayName = displayName;
+      if (newPassword) updateData.password = await hashPassword(newPassword);
       
       // Atualizar usuário
       const updatedUser = await storage.updateUser(req.user.id, updateData);

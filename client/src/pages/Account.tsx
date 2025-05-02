@@ -17,17 +17,13 @@ import { Input } from "@/components/ui/input";
 
 const profileSchema = z.object({
   displayName: z.string().min(3, "O nome de exibição deve ter pelo menos 3 caracteres").optional().nullable(),
-  currentPassword: z.string().optional(),
+  currentPassword: z.string().min(1, "Senha atual é obrigatória para alterações"),
   newPassword: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres").optional(),
   confirmPassword: z.string().optional(),
 }).refine((data) => {
-  // Se o usuário estiver tentando alterar a senha
-  if (data.newPassword && data.confirmPassword) {
-    // Verificar se as senhas coincidem
-    if (data.newPassword !== data.confirmPassword) {
-      return false;
-    }
-  }
+  if (data.newPassword && !data.confirmPassword) return false;
+  if (!data.newPassword && data.confirmPassword) return false;
+  if (data.newPassword && data.confirmPassword && data.newPassword !== data.confirmPassword) return false;
   return true;
 }, {
   message: "As senhas não coincidem",
@@ -52,21 +48,7 @@ export default function Account() {
   
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormValues) => {
-      // Vamos enviar apenas os campos preenchidos
-      const payload: any = {};
-      
-      // Adiciona apenas displayName se for diferente do atual e tiver pelo menos 3 caracteres
-      if (data.displayName && data.displayName.length >= 3 && data.displayName !== user?.displayName) {
-        payload.displayName = data.displayName;
-      }
-      
-      // Se estiver tentando alterar a senha
-      if (data.newPassword) {
-        payload.newPassword = data.newPassword;
-        payload.currentPassword = data.currentPassword;
-      }
-      
-      const res = await apiRequest("PATCH", "/api/protected/profile", payload);
+      const res = await apiRequest("PATCH", "/api/protected/profile", data);
       return await res.json();
     },
     onSuccess: () => {
@@ -83,48 +65,15 @@ export default function Account() {
       });
     },
     onError: (error: Error) => {
-      // Mensagens de erro personalizadas
-      let message = error.message;
-      
-      if (error.message.includes("Senha atual incorreta")) {
-        message = "A senha atual está incorreta. Se você deseja alterar apenas o nome, deixe os campos de senha em branco.";
-      } else if (error.message.includes("Senha atual é necessária")) {
-        message = "Para alterar sua senha, é necessário informar sua senha atual.";
-      }
-      
       toast({
         title: "Erro ao atualizar perfil",
-        description: message,
+        description: error.message,
         variant: "destructive",
       });
     },
   });
   
   const onSubmit = (data: ProfileFormValues) => {
-    // Verificar se há alterações para submeter
-    const hasDisplayNameChange = data.displayName && data.displayName.length >= 3 && data.displayName !== user?.displayName;
-    const hasPasswordChange = !!data.newPassword;
-    
-    // Se não houver alterações, mostrar uma mensagem
-    if (!hasDisplayNameChange && !hasPasswordChange) {
-      toast({
-        title: "Nenhuma alteração detectada",
-        description: "Faça alterações no nome de exibição ou na senha para salvar.",
-        variant: "default",
-      });
-      return;
-    }
-    
-    // Se houver tentativa de alteração de senha sem informar senha atual
-    if (hasPasswordChange && !data.currentPassword) {
-      toast({
-        title: "Senha atual necessária",
-        description: "Para alterar sua senha, você precisa informar sua senha atual.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     updateProfileMutation.mutate(data);
   };
   
@@ -141,7 +90,7 @@ export default function Account() {
   return (
     <Layout>
       <div className="container mx-auto py-6 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Perfil de Usuário</h1>
+        <h1 className="text-3xl font-bold mb-6">Perfil de Usuário</h1>
         
         <Card>
           <CardHeader>
@@ -165,11 +114,6 @@ export default function Account() {
                 <p className="text-xs text-muted-foreground mt-1">
                   {user.role === "admin" ? "Administrador" : "Funcionário"}
                 </p>
-                <div className="mt-2">
-                  <span className="inline-flex items-center rounded-md bg-primary px-2 py-1 text-xs font-medium text-secondary">
-                    {user.points} xCoins
-                  </span>
-                </div>
               </div>
             </div>
             
@@ -187,11 +131,8 @@ export default function Account() {
                       <FormItem>
                         <FormLabel>Nome de Exibição</FormLabel>
                         <FormControl>
-                          <Input placeholder="Seu nome completo (opcional)" {...field} value={field.value || ""} />
+                          <Input placeholder="Seu nome completo" {...field} value={field.value || ""} />
                         </FormControl>
-                        <p className="text-xs text-muted-foreground">
-                          Nome que será exibido no sistema. Mínimo de 3 caracteres.
-                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -221,11 +162,8 @@ export default function Account() {
                       <FormItem>
                         <FormLabel>Senha Atual</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Necessária apenas para alterar senha" {...field} />
+                          <Input type="password" {...field} />
                         </FormControl>
-                        <p className="text-xs text-muted-foreground">
-                          Obrigatória apenas se você quiser alterar sua senha
-                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -239,11 +177,8 @@ export default function Account() {
                         <FormItem>
                           <FormLabel>Nova Senha</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Opcional" {...field} />
+                            <Input type="password" {...field} />
                           </FormControl>
-                          <p className="text-xs text-muted-foreground">
-                            Mínimo de 6 caracteres
-                          </p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -255,11 +190,8 @@ export default function Account() {
                         <FormItem>
                           <FormLabel>Confirmar Nova Senha</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Opcional" {...field} />
+                            <Input type="password" {...field} />
                           </FormControl>
-                          <p className="text-xs text-muted-foreground">
-                            Deve ser igual à nova senha
-                          </p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -267,10 +199,9 @@ export default function Account() {
                   </div>
                 </div>
                 
-                <div className="flex flex-col items-end gap-2">
+                <div className="flex justify-end">
                   <Button 
-                    type="submit"
-                    className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
+                    type="submit" 
                     disabled={updateProfileMutation.isPending}
                   >
                     {updateProfileMutation.isPending ? (
@@ -282,9 +213,6 @@ export default function Account() {
                       "Salvar Alterações"
                     )}
                   </Button>
-                  <p className="text-xs text-muted-foreground italic">
-                    Nenhum campo é obrigatório para salvar. Preencha apenas os campos que deseja alterar.
-                  </p>
                 </div>
               </form>
             </Form>

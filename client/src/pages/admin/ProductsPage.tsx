@@ -387,7 +387,7 @@ export default function AdminProductsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nome</TableHead>
-                    <TableHead>xCoins</TableHead>
+                    <TableHead>Pontos</TableHead>
                     <TableHead>Estoque</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
@@ -500,7 +500,7 @@ export default function AdminProductsPage() {
                   name="pointsCost"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Custo em xCoins</FormLabel>
+                      <FormLabel>Custo em Pontos</FormLabel>
                       <FormControl>
                         <Input type="number" min="1" {...field} />
                       </FormControl>
@@ -664,7 +664,7 @@ export default function AdminProductsPage() {
                   name="pointsCost"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Custo em xCoins</FormLabel>
+                      <FormLabel>Custo em Pontos</FormLabel>
                       <FormControl>
                         <Input type="number" min="1" {...field} />
                       </FormControl>

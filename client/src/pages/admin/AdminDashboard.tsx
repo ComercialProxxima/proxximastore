@@ -102,7 +102,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // Abrir modal para adicionar xCoins
+  // Abrir modal para adicionar pontos
   const openAddPointsModal = (user: User) => {
     setSelectedUser(user);
     setPointsToAdd(0);
@@ -110,7 +110,7 @@ export default function AdminDashboard() {
     setIsAddPointsModalOpen(true);
   };
 
-  // Adicionar xCoins ao usuário
+  // Adicionar pontos ao usuário
   const handleAddPoints = async () => {
     if (!selectedUser || pointsToAdd === 0 || !pointsDescription.trim()) return;
 
@@ -130,20 +130,20 @@ export default function AdminDashboard() {
 
       if (response.ok) {
         toast({
-          title: "xCoins adicionados com sucesso",
-          description: `${pointsToAdd} xCoins foram adicionados para ${selectedUser.displayName || selectedUser.username}.`,
+          title: "Pontos adicionados com sucesso",
+          description: `${pointsToAdd} pontos foram adicionados para ${selectedUser.displayName || selectedUser.username}.`,
         });
         
         // Fechar modal e reiniciar busca de funcionários
         setIsAddPointsModalOpen(false);
       } else {
         const error = await response.json();
-        throw new Error(error.message || "Erro ao adicionar xCoins");
+        throw new Error(error.message || "Erro ao adicionar pontos");
       }
     } catch (error) {
       toast({
-        title: "Erro ao adicionar xCoins",
-        description: error.message || "Ocorreu um erro ao adicionar xCoins.",
+        title: "Erro ao adicionar pontos",
+        description: error.message || "Ocorreu um erro ao adicionar pontos.",
         variant: "destructive",
       });
     } finally {
@@ -178,7 +178,7 @@ export default function AdminDashboard() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Dashboard Administrativo</h1>
         <p className="text-muted-foreground">
-          Visão geral do sistema de xCoins e recompensas
+          Visão geral do sistema de pontos e recompensas
         </p>
       </div>
 
@@ -255,7 +255,7 @@ export default function AdminDashboard() {
             <div>
               <CardTitle className="text-lg">Funcionários</CardTitle>
               <CardDescription>
-                Gerenciar xCoins dos funcionários
+                Gerenciar pontos dos funcionários
               </CardDescription>
             </div>
             <Button 
@@ -274,7 +274,7 @@ export default function AdminDashboard() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nome</TableHead>
-                      <TableHead>xCoins</TableHead>
+                      <TableHead>Pontos</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -304,7 +304,7 @@ export default function AdminDashboard() {
                             onClick={() => openAddPointsModal(employee)}
                           >
                             <Plus className="mr-1 h-4 w-4" />
-                            Adicionar xCoins
+                            Adicionar Pontos
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -350,7 +350,7 @@ export default function AdminDashboard() {
                     <TableRow>
                       <TableHead>Nº</TableHead>
                       <TableHead>Data</TableHead>
-                      <TableHead>xCoins</TableHead>
+                      <TableHead>Pontos</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -381,20 +381,20 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Modal para adicionar xCoins */}
+      {/* Modal para adicionar pontos */}
       {selectedUser && (
         <Dialog open={isAddPointsModalOpen} onOpenChange={setIsAddPointsModalOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Adicionar xCoins</DialogTitle>
+              <DialogTitle>Adicionar Pontos</DialogTitle>
               <DialogDescription>
-                Adicione xCoins para {selectedUser.displayName || selectedUser.username}. 
-                O usuário atualmente possui {selectedUser.points} xCoins.
+                Adicione pontos para {selectedUser.displayName || selectedUser.username}. 
+                O usuário atualmente possui {selectedUser.points} pontos.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div>
-                <Label htmlFor="points">Quantidade de xCoins</Label>
+                <Label htmlFor="points">Quantidade de Pontos</Label>
                 <Input
                   id="points"
                   type="number"
@@ -409,7 +409,7 @@ export default function AdminDashboard() {
                   id="description"
                   value={pointsDescription}
                   onChange={(e) => setPointsDescription(e.target.value)}
-                  placeholder="Motivo da adição de xCoins"
+                  placeholder="Motivo da adição de pontos"
                   className="mt-1"
                 />
               </div>
@@ -431,7 +431,7 @@ export default function AdminDashboard() {
                     Processando...
                   </>
                 ) : (
-                  "Adicionar xCoins"
+                  "Adicionar Pontos"
                 )}
               </Button>
             </DialogFooter>

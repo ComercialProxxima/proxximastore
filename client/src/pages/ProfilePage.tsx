@@ -74,17 +74,69 @@ export default function ProfilePage() {
     },
   });
   
-  // Manipulador para upload de imagem
+  // Manipulador para upload de imagem com redimensionamento
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Verificar se o arquivo é uma imagem
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Tipo de arquivo inválido",
+          description: "Por favor, selecione uma imagem (JPG, PNG, etc.)",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Redimensionar a imagem antes de armazená-la
+      const img = new Image();
       const reader = new FileReader();
+      
       reader.onload = (event) => {
-        const imageData = event.target?.result as string;
-        setImageUrl(imageData);
-        setIsRemovingImage(false);
-        setShowImageDialog(false);
+        if (event.target?.result) {
+          img.onload = () => {
+            // Definir tamanho máximo de 400x400px para avatars
+            const MAX_WIDTH = 400;
+            const MAX_HEIGHT = 400;
+            
+            let width = img.width;
+            let height = img.height;
+            
+            // Calcular proporção para redimensionamento
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+            
+            // Criar canvas e desenhar imagem redimensionada
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, width, height);
+              
+              // Converter para data URL (qualidade 0.85 para JPEG)
+              const imageData = canvas.toDataURL('image/jpeg', 0.85);
+              setImageUrl(imageData);
+              setIsRemovingImage(false);
+              setShowImageDialog(false);
+              
+              console.log("Imagem redimensionada para " + width + "x" + height);
+            }
+          };
+          img.src = event.target.result as string;
+        }
       };
+      
       reader.readAsDataURL(file);
     }
   };

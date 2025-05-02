@@ -93,13 +93,13 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-background">
       {/* Coluna de formulário */}
       <div className="flex flex-col justify-center flex-1 px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
         <div className="w-full max-w-sm mx-auto lg:w-96">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Loja Corporativa</h1>
-            <p className="mt-2 text-sm text-gray-600">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Loja Corporativa</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
               Sistema de pontos e recompensas para funcionários
             </p>
           </div>
@@ -164,7 +164,7 @@ export default function AuthPage() {
                   </Form>
                 </CardContent>
                 <CardFooter className="flex flex-col items-center justify-center">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Entre em contato com um administrador para criar sua conta.
                   </p>
                 </CardFooter>
@@ -178,7 +178,7 @@ export default function AuthPage() {
 
       {/* Coluna hero */}
       <div className="relative hidden w-0 flex-1 lg:block">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-700 flex flex-col justify-center items-center p-12 text-white">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary flex flex-col justify-center items-center p-12 text-white">
           <div className="max-w-md mx-auto">
             <h2 className="text-4xl font-bold mb-6">Sistema de Recompensas</h2>
             <p className="text-xl mb-8">

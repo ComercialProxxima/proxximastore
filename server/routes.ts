@@ -444,6 +444,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get all orders (admin only)
+  app.get("/api/admin/orders", isAdmin, async (req: Request, res: Response) => {
+    try {
+      // Obter todos os pedidos com informações do usuário
+      const allOrders = await storage.getAllOrders();
+      
+      res.status(200).json(allOrders);
+    } catch (error) {
+      res.status(500).json({ message: `Erro ao buscar pedidos: ${error instanceof Error ? error.message : String(error)}` });
+    }
+  });
+  
+  // Get specific order details (admin only)
+  app.get("/api/admin/orders/:id", isAdmin, async (req: Request, res: Response) => {
+    try {
+      const id = parseId(req.params.id);
+      
+      const orderDetails = await storage.getOrderWithItems(id);
+      if (!orderDetails) {
+        return res.status(404).json({ message: "Pedido não encontrado" });
+      }
+      
+      res.status(200).json(orderDetails);
+    } catch (error) {
+      res.status(500).json({ message: `Erro ao buscar detalhes do pedido: ${error instanceof Error ? error.message : String(error)}` });
+    }
+  });
+  
   // Update order status (admin only)
   app.patch("/api/admin/orders/:id/status", isAdmin, async (req: Request, res: Response) => {
     try {

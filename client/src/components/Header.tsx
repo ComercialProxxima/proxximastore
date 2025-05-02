@@ -21,15 +21,15 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-background border-b shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link href="/">
-              <a className="flex items-center">
-                <MessageSquare className="h-8 w-8 text-primary" />
-                <h1 className="ml-2 text-xl font-semibold">MeetingMind</h1>
-              </a>
+              <div className="flex items-center cursor-pointer">
+                <MessageSquare className="h-8 w-8 text-secondary" />
+                <h1 className="ml-2 text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">MeetingMind</h1>
+              </div>
             </Link>
           </div>
           
@@ -38,7 +38,7 @@ const Header = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2 text-sm focus:outline-none">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary text-white">
+                    <AvatarFallback className="bg-gradient-to-r from-primary to-secondary text-white">
                       {user.initials}
                     </AvatarFallback>
                   </Avatar>

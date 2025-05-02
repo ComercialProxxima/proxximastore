@@ -60,12 +60,12 @@ export default function Navbar() {
         <div className="flex items-center space-x-2">
           <Link href="/">
             <div className="flex items-center space-x-2 cursor-pointer">
-              <Package className="h-6 w-6 text-primary" />
-              <span className="font-bold text-xl">Loja Corporativa</span>
+              <Package className="h-6 w-6 text-secondary" /> {/* Rosa #E6007D */}
+              <span className="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Loja Corporativa</span> {/* Gradiente do azul #2C2C83 para rosa #E6007D */}
             </div>
           </Link>
           {isAdmin && (
-            <Badge variant="outline" className="ml-2 bg-primary/10">
+            <Badge variant="secondary" className="ml-2">
               Administrador
             </Badge>
           )}
@@ -170,7 +170,7 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle>Loja Corporativa</SheetTitle>
+                <SheetTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Loja Corporativa</SheetTitle>
               </SheetHeader>
               <div className="py-4 space-y-4">
                 <div className="flex items-center space-x-2 mb-6">
@@ -187,28 +187,28 @@ export default function Navbar() {
                 <nav className="flex flex-col space-y-3">
                   <Link href="/">
                     <div className="flex items-center py-2 px-1 rounded-md hover:bg-primary/10 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
-                      <Package className="mr-2 h-5 w-5 text-primary" />
+                      <Package className="mr-2 h-5 w-5 text-secondary" />
                       Produtos
                     </div>
                   </Link>
                   
                   <Link href="/my-points">
                     <div className="flex items-center py-2 px-1 rounded-md hover:bg-primary/10 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
-                      <Award className="mr-2 h-5 w-5 text-primary" />
+                      <Award className="mr-2 h-5 w-5 text-secondary" />
                       Meus Pontos
                     </div>
                   </Link>
                   
                   <Link href="/my-orders">
                     <div className="flex items-center py-2 px-1 rounded-md hover:bg-primary/10 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
-                      <ShoppingCart className="mr-2 h-5 w-5 text-primary" />
+                      <ShoppingCart className="mr-2 h-5 w-5 text-secondary" />
                       Meus Pedidos
                     </div>
                   </Link>
                   
                   <Link href="/profile">
                     <div className="flex items-center py-2 px-1 rounded-md hover:bg-primary/10 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
-                      <User className="mr-2 h-5 w-5 text-primary" />
+                      <User className="mr-2 h-5 w-5 text-secondary" />
                       Meu Perfil
                     </div>
                   </Link>

@@ -109,19 +109,25 @@ export default function ProductsPage() {
 
   return (
     <Layout>
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Produtos Disponíveis</h1>
-          <p className="text-muted-foreground">
-            Troque seus xCoins (<span className="font-semibold text-secondary">{user?.points || 0}</span> disponíveis) por produtos exclusivos
-          </p>
+      <div className="container mx-auto py-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Produtos Disponíveis</h1>
+            <p className="text-muted-foreground mt-1">
+              Troque seus xCoins (<span className="font-semibold text-secondary">{user?.points || 0}</span> disponíveis) por produtos exclusivos
+            </p>
+          </div>
         </div>
-      </div>
+        
+        <DataTableHeader 
+          title=""
+          onSearch={setSearchQuery}
+          onExport={getExportData}
+          exportFileName="catalogo-produtos"
+        />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products
-          .filter(product => product.isActive)
-          .map((product) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+          {filteredProducts.map((product) => (
             <Card key={product.id} className="overflow-hidden flex flex-col h-full">
               <div className="aspect-square relative bg-muted">
                 {product.imageUrl ? (
@@ -173,6 +179,7 @@ export default function ProductsPage() {
               </CardFooter>
             </Card>
           ))}
+        </div>
       </div>
     </Layout>
   );

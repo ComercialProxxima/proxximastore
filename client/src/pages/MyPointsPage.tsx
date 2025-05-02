@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -28,11 +28,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, TrendingUp, TrendingDown, Award } from "lucide-react";
+import DataTableHeader from "@/components/DataTableHeader";
 
 export default function MyPointsPage() {
   const { user } = useAuth();
   const [location, navigate] = useLocation();
   const [transactionType, setTransactionType] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Buscar histórico de pontos
   const { data: transactions, isLoading, error } = useQuery<PointTransaction[]>({

@@ -25,13 +25,13 @@ declare global {
 
 const scryptAsync = promisify(scrypt);
 
-async function hashPassword(password: string) {
+export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
   return `${buf.toString("hex")}.${salt}`;
 }
 
-async function comparePasswords(supplied: string, stored: string) {
+export async function comparePasswords(supplied: string, stored: string) {
   const [hashed, salt] = stored.split(".");
   const hashedBuf = Buffer.from(hashed, "hex");
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
@@ -82,44 +82,57 @@ export function setupAuth(app: Express) {
     }
   });
 
-  // Registration route
+  // Registration route (apenas administradores ou primeiro usuário)
   app.post("/api/register", async (req, res, next) => {
     try {
+      // Verificar se o usuário existe
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
         return res.status(400).json({ message: "Nome de usuário já existe" });
       }
 
-      // First user is created as admin by default
+      // Verificar se é o primeiro usuário (caso especial: primeiro usuário é admin)
       const allUsers = await storage.getAllUsers();
       const isFirstUser = allUsers.length === 0;
+      
+      // Se não for o primeiro usuário, apenas admins podem registrar
+      if (!isFirstUser && (!req.isAuthenticated() || req.user.role !== UserRoleEnum.ADMIN)) {
+        return res.status(403).json({ 
+          message: "Apenas administradores podem registrar novos usuários" 
+        });
+      }
+      
+      // Definir papel do usuário
       const role = isFirstUser ? UserRoleEnum.ADMIN : (req.body.role || UserRoleEnum.EMPLOYEE);
-
-      // Check if non-admin is trying to create an admin
+      
+      // Verificar se não-admin está tentando criar admin
       if (
         req.user && 
         req.user.role !== UserRoleEnum.ADMIN && 
         role === UserRoleEnum.ADMIN
       ) {
-        return res.status(403).json({ message: "Você não tem permissão para criar usuários administradores" });
+        return res.status(403).json({ 
+          message: "Você não tem permissão para criar usuários administradores" 
+        });
       }
 
+      // Criar o usuário
       const user = await storage.createUser({
         ...req.body,
         role,
         password: await hashPassword(req.body.password),
       });
 
-      // Automatically log in after registration if not already logged in
-      if (!req.user) {
+      // Fazer login automático após registro se for o primeiro usuário
+      if (isFirstUser && !req.user) {
         req.login(user, (err) => {
           if (err) return next(err);
-          // Don't send password hash to client
+          // Não enviar hash de senha para o cliente
           const { password, ...userWithoutPassword } = user;
           res.status(201).json(userWithoutPassword);
         });
       } else {
-        // Don't send password hash to client
+        // Não enviar hash de senha para o cliente
         const { password, ...userWithoutPassword } = user;
         res.status(201).json(userWithoutPassword);
       }

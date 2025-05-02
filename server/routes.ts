@@ -521,6 +521,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: `Erro ao buscar histórico de pontos: ${error.message}` });
     }
   });
+  
+  // Rota para atualizar o perfil do usuário
+  app.patch("/api/protected/profile", async (req: Request, res: Response) => {
+    try {
+      const { displayName, currentPassword, newPassword } = req.body;
+      
+      // Verificar a senha atual
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      // Importar funções de autenticação
+      const { comparePasswords, hashPassword } = await import("./auth");
+      
+      // Comparar senha atual
+      const passwordValid = await comparePasswords(currentPassword, user.password);
+      if (!passwordValid) {
+        return res.status(400).json({ message: "Senha atual incorreta" });
+      }
+      
+      // Preparar dados de atualização
+      const updateData: any = {};
+      if (displayName !== undefined) updateData.displayName = displayName;
+      if (newPassword) updateData.password = await hashPassword(newPassword);
+      
+      // Atualizar usuário
+      const updatedUser = await storage.updateUser(req.user.id, updateData);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "Não foi possível atualizar o usuário" });
+      }
+      
+      // Não enviar hash de senha para o cliente
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Erro ao atualizar perfil:", error);
+      res.status(500).json({ message: `Erro ao atualizar perfil: ${error.message}` });
+    }
+  });
 
   // Init server
   const httpServer = createServer(app);

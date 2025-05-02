@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -13,87 +12,21 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle 
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Loader2, ShoppingCart, Tag, Package } from "lucide-react";
 
 export default function ProductsPage() {
   const { user } = useAuth();
   const [location, navigate] = useLocation();
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [quantity, setQuantity] = useState(1);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  // Não precisamos mais desses estados já que usamos a página de checkout
 
   // Buscar produtos
   const { data: products, isLoading, error } = useQuery<Product[]>({
     queryKey: ["/api/products"],
   });
 
-  // Função para abrir o modal de compra
+  // Função para redirecionar para a página de checkout
   const openPurchaseDialog = (product: Product) => {
-    setSelectedProduct(product);
-    setQuantity(1);
-    setIsDialogOpen(true);
-  };
-
-  // Função para calcular o custo total
-  const calculateTotalCost = () => {
-    if (!selectedProduct) return 0;
-    return selectedProduct.pointsCost * quantity;
-  };
-
-  // Verificar se o usuário tem pontos suficientes
-  const hasEnoughPoints = () => {
-    if (!user || !selectedProduct) return false;
-    return user.points >= calculateTotalCost();
-  };
-
-  // Função para realizar a compra
-  const handlePurchase = async () => {
-    if (!selectedProduct) return;
-
-    setIsProcessing(true);
-
-    try {
-      const response = await fetch("/api/protected/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: [
-            {
-              productId: selectedProduct.id,
-              quantity,
-            },
-          ],
-        }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        setIsDialogOpen(false);
-        // Redirecionar para a página de detalhes do pedido
-        navigate(`/my-orders/${result.order.id}`);
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || "Erro ao processar pedido");
-      }
-    } catch (error) {
-      console.error("Erro ao realizar a compra:", error);
-      // Em uma aplicação real, mostraríamos o erro para o usuário
-    } finally {
-      setIsProcessing(false);
-    }
+    navigate(`/checkout/${product.id}`);
   };
 
   // Renderizar estado de carregamento
@@ -203,113 +136,6 @@ export default function ProductsPage() {
             </Card>
           ))}
       </div>
-
-      {/* Modal de confirmação de compra */}
-      {selectedProduct && (
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Confirmar Troca</DialogTitle>
-              <DialogDescription>
-                Você está trocando seus pontos pelo seguinte produto:
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="md:w-1/3 bg-muted rounded-md overflow-hidden aspect-square flex items-center justify-center">
-                  {selectedProduct.imageUrl ? (
-                    <img
-                      src={selectedProduct.imageUrl}
-                      alt={selectedProduct.name}
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <Package className="h-12 w-12 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="md:w-2/3">
-                  <h3 className="font-medium">{selectedProduct.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {selectedProduct.description || 'Sem descrição disponível'}
-                  </p>
-                  <div className="mt-2">
-                    <Badge variant="outline" className="bg-primary/10">
-                      {selectedProduct.pointsCost} pontos por unidade
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="quantity">Quantidade</Label>
-                <div className="flex items-center mt-1">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    disabled={quantity <= 1}
-                  >
-                    -
-                  </Button>
-                  <Input
-                    id="quantity"
-                    type="number"
-                    min="1"
-                    max={selectedProduct.stock}
-                    value={quantity}
-                    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                    className="w-16 mx-2 text-center"
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setQuantity(Math.min(selectedProduct.stock, quantity + 1))}
-                    disabled={quantity >= selectedProduct.stock}
-                  >
-                    +
-                  </Button>
-                </div>
-              </div>
-              <div className="bg-muted p-3 rounded-md mt-2">
-                <div className="flex justify-between text-sm">
-                  <span>Pontos atuais:</span>
-                  <span>{user?.points || 0} pontos</span>
-                </div>
-                <div className="flex justify-between text-sm mt-2">
-                  <span>Custo total:</span>
-                  <span>{calculateTotalCost()} pontos</span>
-                </div>
-                <div className="flex justify-between font-medium mt-2">
-                  <span>Pontos restantes:</span>
-                  <span>{(user?.points || 0) - calculateTotalCost()} pontos</span>
-                </div>
-              </div>
-              {!hasEnoughPoints() && (
-                <div className="text-red-500 text-sm">
-                  Você não tem pontos suficientes para esta troca.
-                </div>
-              )}
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button 
-                onClick={handlePurchase} 
-                disabled={!hasEnoughPoints() || isProcessing}
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  "Confirmar Troca"
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
     </Layout>
   );
 }

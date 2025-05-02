@@ -12,9 +12,13 @@ import AuthPage from "@/pages/auth-page";
 import ProductsPage from "@/pages/ProductsPage";
 import MyPointsPage from "@/pages/MyPointsPage";
 import MyOrdersPage from "@/pages/MyOrdersPage";
+import OrderDetailPage from "@/pages/OrderDetailPage";
+import CheckoutPage from "@/pages/CheckoutPage";
+import Account from "@/pages/Account";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminProductsPage from "@/pages/admin/ProductsPage";
 import EmployeesPage from "@/pages/admin/EmployeesPage";
+import OrdersPage from "@/pages/admin/OrdersPage";
 
 function App() {
   return (
@@ -29,13 +33,17 @@ function App() {
                 
                 {/* Rotas protegidas (apenas usuários autenticados) */}
                 <ProtectedRoute path="/" component={ProductsPage} />
+                <ProtectedRoute path="/checkout/:id" component={CheckoutPage} />
                 <ProtectedRoute path="/my-points" component={MyPointsPage} />
                 <ProtectedRoute path="/my-orders" component={MyOrdersPage} />
+                <ProtectedRoute path="/my-orders/:id" component={OrderDetailPage} />
+                <ProtectedRoute path="/account" component={Account} />
                 
                 {/* Rotas administrativas (apenas administradores) */}
                 <AdminRoute path="/admin" component={AdminDashboard} />
                 <AdminRoute path="/admin/products" component={AdminProductsPage} />
                 <AdminRoute path="/admin/employees" component={EmployeesPage} />
+                <AdminRoute path="/admin/orders" component={OrdersPage} />
                 
                 {/* Página não encontrada */}
                 <Route component={NotFound} />

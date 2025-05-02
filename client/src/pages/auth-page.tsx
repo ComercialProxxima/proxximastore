@@ -105,9 +105,8 @@ export default function AuthPage() {
           </div>
 
           <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Registro</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-1 mb-6">
+              <TabsTrigger value="login" className="w-full">Login</TabsTrigger>
             </TabsList>
 
             <TabsContent value="login">
@@ -166,111 +165,13 @@ export default function AuthPage() {
                 </CardContent>
                 <CardFooter className="flex flex-col items-center justify-center">
                   <p className="text-sm text-gray-500">
-                    Não tem uma conta?{" "}
-                    <button
-                      onClick={() => setActiveTab("register")}
-                      className="text-primary hover:underline"
-                    >
-                      Registre-se
-                    </button>
+                    Entre em contato com um administrador para criar sua conta.
                   </p>
                 </CardFooter>
               </Card>
             </TabsContent>
 
-            <TabsContent value="register">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Crie sua conta</CardTitle>
-                  <CardDescription>
-                    Preencha as informações abaixo para criar sua conta.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...registerForm}>
-                    <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                      <FormField
-                        control={registerForm.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nome de usuário</FormLabel>
-                            <FormControl>
-                              <Input placeholder="nome_usuario" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={registerForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input type="email" placeholder="seu@email.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={registerForm.control}
-                        name="displayName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nome de exibição (opcional)</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Seu Nome" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={registerForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Senha</FormLabel>
-                            <FormControl>
-                              <Input type="password" placeholder="******" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button 
-                        type="submit" 
-                        className="w-full" 
-                        disabled={registerMutation.isPending}
-                      >
-                        {registerMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Registrando...
-                          </>
-                        ) : (
-                          "Registrar"
-                        )}
-                      </Button>
-                    </form>
-                  </Form>
-                </CardContent>
-                <CardFooter className="flex flex-col items-center justify-center">
-                  <p className="text-sm text-gray-500">
-                    Já tem uma conta?{" "}
-                    <button
-                      onClick={() => setActiveTab("login")}
-                      className="text-primary hover:underline"
-                    >
-                      Faça login
-                    </button>
-                  </p>
-                </CardFooter>
-              </Card>
-            </TabsContent>
+
           </Tabs>
         </div>
       </div>

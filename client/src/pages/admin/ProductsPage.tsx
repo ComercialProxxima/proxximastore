@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Image as ImageIcon } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -66,6 +67,9 @@ export default function AdminProductsPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Buscar produtos
   const {
@@ -91,13 +95,41 @@ export default function AdminProductsPage() {
   // Mutation para criar produto
   const createProductMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
-      const res = await apiRequest("POST", "/api/admin/products", data);
-      return await res.json();
+      // Se houver uma imagem, usar FormData para envio multipart
+      if (selectedImage) {
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('description', data.description || '');
+        formData.append('pointsCost', data.pointsCost.toString());
+        formData.append('stock', data.stock.toString());
+        formData.append('isActive', data.isActive.toString());
+        formData.append('image', selectedImage);
+        
+        // Fazer solicitação POST com FormData
+        const res = await fetch('/api/admin/products', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || 'Erro ao criar produto');
+        }
+        
+        return await res.json();
+      } else {
+        // Sem imagem, usar solicitação normal
+        const res = await apiRequest("POST", "/api/admin/products", data);
+        return await res.json();
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setIsCreateDialogOpen(false);
       form.reset();
+      setSelectedImage(null);
+      setImagePreview(null);
       toast({
         title: "Produto criado",
         description: "O produto foi criado com sucesso.",
@@ -121,13 +153,41 @@ export default function AdminProductsPage() {
       id: number;
       data: ProductFormData;
     }) => {
-      const res = await apiRequest("PATCH", `/api/admin/products/${id}`, data);
-      return await res.json();
+      // Se houver uma imagem, usar FormData para envio multipart
+      if (selectedImage) {
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('description', data.description || '');
+        formData.append('pointsCost', data.pointsCost.toString());
+        formData.append('stock', data.stock.toString());
+        formData.append('isActive', data.isActive.toString());
+        formData.append('image', selectedImage);
+        
+        // Fazer solicitação PATCH com FormData
+        const res = await fetch(`/api/admin/products/${id}`, {
+          method: 'PATCH',
+          body: formData,
+          credentials: 'include'
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || 'Erro ao atualizar produto');
+        }
+        
+        return await res.json();
+      } else {
+        // Sem imagem, usar solicitação normal
+        const res = await apiRequest("PATCH", `/api/admin/products/${id}`, data);
+        return await res.json();
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setIsEditDialogOpen(false);
       setSelectedProduct(null);
+      setSelectedImage(null);
+      setImagePreview(null);
       toast({
         title: "Produto atualizado",
         description: "O produto foi atualizado com sucesso.",
@@ -168,6 +228,14 @@ export default function AdminProductsPage() {
   // Abrir modal de edição e preencher o formulário
   const handleEditProduct = (product: Product) => {
     setSelectedProduct(product);
+    // Limpar imagem prévia, vamos usar a imageUrl do produto se existir
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    
+    // Preencher o formulário com dados do produto
     form.reset({
       name: product.name,
       description: product.description || "",
@@ -175,6 +243,7 @@ export default function AdminProductsPage() {
       stock: product.stock,
       isActive: product.isActive,
     });
+    
     setIsEditDialogOpen(true);
   };
 
@@ -182,6 +251,50 @@ export default function AdminProductsPage() {
   const handleDeleteProduct = (product: Product) => {
     setSelectedProduct(product);
     setIsDeleteDialogOpen(true);
+  };
+
+  // Handler para manipular a seleção de imagem
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Validar se é uma imagem
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Arquivo inválido",
+        description: "Por favor, selecione uma imagem válida.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Limitar tamanho (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "O tamanho máximo permitido é 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSelectedImage(file);
+    
+    // Criar preview da imagem
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImagePreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  // Handler para limpar a imagem selecionada
+  const handleClearImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   // Handler para criar produto
@@ -429,6 +542,52 @@ export default function AdminProductsPage() {
                   </FormItem>
                 )}
               />
+              {/* Upload de imagem */}
+              <div className="space-y-3">
+                <FormLabel>Imagem do Produto</FormLabel>
+                <div className="grid gap-4">
+                  {imagePreview ? (
+                    <div className="relative rounded-md overflow-hidden border aspect-square w-full max-w-[300px] mx-auto">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview da imagem"
+                        className="object-cover w-full h-full"
+                      />
+                      <Button 
+                        type="button"
+                        variant="destructive" 
+                        size="sm"
+                        className="absolute top-2 right-2 h-8 w-8 p-0 rounded-full" 
+                        onClick={handleClearImage}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div 
+                      className="border-2 border-dashed rounded-md flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:border-primary/50 transition-colors max-w-[300px] mx-auto aspect-square"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
+                      <div className="text-muted-foreground mb-1">
+                        Arraste e solte ou clique para escolher uma imagem
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        SVG, PNG, JPG ou GIF (máx. 5MB)
+                      </div>
+                    </div>
+                  )}
+                  
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                  />
+                </div>
+              </div>
+
               <DialogFooter>
                 <Button
                   type="button"
@@ -547,6 +706,70 @@ export default function AdminProductsPage() {
                   </FormItem>
                 )}
               />
+              {/* Upload de imagem */}
+              <div className="space-y-3">
+                <FormLabel>Imagem do Produto</FormLabel>
+                <div className="grid gap-4">
+                  {imagePreview ? (
+                    <div className="relative rounded-md overflow-hidden border aspect-square w-full max-w-[300px] mx-auto">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview da imagem"
+                        className="object-cover w-full h-full"
+                      />
+                      <Button 
+                        type="button"
+                        variant="destructive" 
+                        size="sm"
+                        className="absolute top-2 right-2 h-8 w-8 p-0 rounded-full" 
+                        onClick={handleClearImage}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : selectedProduct?.imageUrl ? (
+                    <div className="relative rounded-md overflow-hidden border aspect-square w-full max-w-[300px] mx-auto">
+                      <img 
+                        src={selectedProduct.imageUrl} 
+                        alt={selectedProduct.name}
+                        className="object-cover w-full h-full"
+                      />
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        size="sm"
+                        className="absolute bottom-2 right-2 bg-white/80 hover:bg-white" 
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Pencil className="h-4 w-4 mr-1" />
+                        Alterar
+                      </Button>
+                    </div>
+                  ) : (
+                    <div 
+                      className="border-2 border-dashed rounded-md flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:border-primary/50 transition-colors max-w-[300px] mx-auto aspect-square"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
+                      <div className="text-muted-foreground mb-1">
+                        Arraste e solte ou clique para escolher uma imagem
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        SVG, PNG, JPG ou GIF (máx. 5MB)
+                      </div>
+                    </div>
+                  )}
+                  
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                  />
+                </div>
+              </div>
+
               <DialogFooter>
                 <Button
                   type="button"

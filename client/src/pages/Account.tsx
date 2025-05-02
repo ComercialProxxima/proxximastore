@@ -1,114 +1,224 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "wouter";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import Layout from "@/components/Layout";
+import { Loader2, User as UserIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
-const Account = () => {
-  const [activeTab, setActiveTab] = useState("account");
+const profileSchema = z.object({
+  displayName: z.string().min(3, "O nome de exibição deve ter pelo menos 3 caracteres").optional().nullable(),
+  currentPassword: z.string().min(1, "Senha atual é obrigatória para alterações"),
+  newPassword: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres").optional(),
+  confirmPassword: z.string().optional(),
+}).refine((data) => {
+  if (data.newPassword && !data.confirmPassword) return false;
+  if (!data.newPassword && data.confirmPassword) return false;
+  if (data.newPassword && data.confirmPassword && data.newPassword !== data.confirmPassword) return false;
+  return true;
+}, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"]
+});
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
+
+export default function Account() {
+  const { toast } = useToast();
+  const { user } = useAuth();
   
-  // In a real app, this would come from an API call
-  const user = {
-    username: "jane_professional",
-    email: "jane@example.com",
-    displayName: "Jane Pro",
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      displayName: user?.displayName || "",
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+  
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: ProfileFormValues) => {
+      const res = await apiRequest("PATCH", "/api/protected/profile", data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      toast({
+        title: "Perfil atualizado",
+        description: "Suas informações foram atualizadas com sucesso.",
+      });
+      form.reset({
+        ...form.getValues(),
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao atualizar perfil",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  const onSubmit = (data: ProfileFormValues) => {
+    updateProfileMutation.mutate(data);
   };
-
+  
+  if (!user) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
+  
   return (
-    <>
-      <Tabs defaultValue="account" className="w-full" onValueChange={setActiveTab} value={activeTab}>
-        <TabsList className="mb-6 border-b border-gray-200 w-full justify-start">
-          <TabsTrigger value="transcriptions" className="data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary" asChild>
-            <Link href="/">Transcriptions</Link>
-          </TabsTrigger>
-          <TabsTrigger value="privacy" className="data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary" asChild>
-            <Link href="/privacy-settings">Privacy Settings</Link>
-          </TabsTrigger>
-          <TabsTrigger value="account" className="data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary">
-            Account
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Settings</CardTitle>
-          <CardDescription>Manage your account information and preferences</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-16 w-16">
-              <AvatarFallback className="bg-primary text-white text-lg">
-                {user.displayName.split(' ').map(name => name[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="text-lg font-medium">{user.displayName}</h3>
-              <p className="text-sm text-gray-500">{user.email}</p>
-            </div>
-          </div>
+    <Layout>
+      <div className="container mx-auto py-6 max-w-4xl">
+        <h1 className="text-3xl font-bold mb-6">Perfil de Usuário</h1>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Informações da Conta</CardTitle>
+            <CardDescription>Gerencie suas informações pessoais e senha</CardDescription>
+          </CardHeader>
           
-          <Separator />
-          
-          <div className="space-y-4">
-            <h4 className="text-base font-medium">Profile Information</h4>
-            
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="displayName">Display Name</Label>
-                <Input id="displayName" defaultValue={user.displayName} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue={user.email} />
+          <CardContent className="space-y-6">
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-16 w-16">
+                <AvatarFallback className="bg-primary text-white text-lg">
+                  {user.displayName ? 
+                    user.displayName.split(' ').map(name => name[0]).join('').toUpperCase() : 
+                    <UserIcon className="h-6 w-6" />
+                  }
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="text-lg font-medium">{user.displayName || user.username}</h3>
+                <p className="text-sm text-muted-foreground">{user.email}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {user.role === "admin" ? "Administrador" : "Funcionário"}
+                </p>
               </div>
             </div>
             
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input id="username" defaultValue={user.username} />
-              </div>
-            </div>
-          </div>
-          
-          <Separator />
-          
-          <div className="space-y-4">
-            <h4 className="text-base font-medium">Change Password</h4>
+            <Separator />
             
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <Input id="currentPassword" type="password" />
-              </div>
-            </div>
-            
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input id="newPassword" type="password" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input id="confirmPassword" type="password" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex justify-end">
-            <Button className="bg-primary hover:bg-blue-600">
-              Save Changes
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="space-y-4">
+                  <h4 className="text-base font-medium">Informações de Perfil</h4>
+                  
+                  <FormField
+                    control={form.control}
+                    name="displayName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome de Exibição</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Seu nome completo" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Nome de Usuário</p>
+                      <p className="text-sm text-muted-foreground">{user.username}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Email</p>
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-4">
+                  <h4 className="text-base font-medium">Alterar Senha</h4>
+                  
+                  <FormField
+                    control={form.control}
+                    name="currentPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Senha Atual</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="newPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nova Senha</FormLabel>
+                          <FormControl>
+                            <Input type="password" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirmar Nova Senha</FormLabel>
+                          <FormControl>
+                            <Input type="password" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    type="submit" 
+                    disabled={updateProfileMutation.isPending}
+                  >
+                    {updateProfileMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Salvando...
+                      </>
+                    ) : (
+                      "Salvar Alterações"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </Layout>
   );
-};
-
-export default Account;
+}

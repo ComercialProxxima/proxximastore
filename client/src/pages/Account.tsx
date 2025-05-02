@@ -18,16 +18,21 @@ import { cn } from "@/lib/utils";
 
 const profileSchema = z.object({
   displayName: z.string().min(3, "O nome de exibição deve ter pelo menos 3 caracteres").optional().nullable(),
-  currentPassword: z.string().min(1, "Senha atual é obrigatória para alterações"),
+  currentPassword: z.string().optional(),
   newPassword: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres").optional(),
   confirmPassword: z.string().optional(),
 }).refine((data) => {
+  // Se estiver alterando a senha, a confirmação deve coincidir
   if (data.newPassword && !data.confirmPassword) return false;
   if (!data.newPassword && data.confirmPassword) return false;
   if (data.newPassword && data.confirmPassword && data.newPassword !== data.confirmPassword) return false;
+  
+  // Se estiver alterando a senha, a senha atual é obrigatória
+  if (data.newPassword && !data.currentPassword) return false;
+  
   return true;
 }, {
-  message: "As senhas não coincidem",
+  message: "Verifique os campos de senha. Senha atual é obrigatória para alterar a senha e as novas senhas devem coincidir.",
   path: ["confirmPassword"]
 });
 
@@ -102,6 +107,41 @@ export default function Account() {
     },
   });
   
+  const updateProfileImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("profileImage", file);
+      
+      const res = await fetch("/api/protected/profile", {
+        method: "PATCH",
+        body: formData,
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Erro ao atualizar foto de perfil");
+      }
+      
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      toast({
+        title: "Foto de perfil atualizada",
+        description: "Sua foto de perfil foi atualizada com sucesso.",
+      });
+      setSelectedImage(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao atualizar foto de perfil",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -110,6 +150,12 @@ export default function Account() {
       // Criar URL de preview para a imagem selecionada
       const objectUrl = URL.createObjectURL(file);
       setPreviewUrl(objectUrl);
+      
+      // Perguntar ao usuário se deseja atualizar a foto imediatamente
+      const confirmUpdate = confirm("Deseja atualizar sua foto de perfil agora?");
+      if (confirmUpdate) {
+        updateProfileImageMutation.mutate(file);
+      }
       
       // Limpar URL quando o componente for desmontado
       return () => URL.revokeObjectURL(objectUrl);
@@ -127,6 +173,12 @@ export default function Account() {
   const triggerFileInput = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
+    }
+  };
+  
+  const saveProfileImage = () => {
+    if (selectedImage) {
+      updateProfileImageMutation.mutate(selectedImage);
     }
   };
   
@@ -257,7 +309,12 @@ export default function Account() {
                 <Separator />
                 
                 <div className="space-y-4">
-                  <h4 className="text-base font-medium">Alterar Senha</h4>
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-base font-medium">Alterar Senha</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Preencha apenas se desejar alterar sua senha
+                    </p>
+                  </div>
                   
                   <FormField
                     control={form.control}
@@ -266,7 +323,7 @@ export default function Account() {
                       <FormItem>
                         <FormLabel>Senha Atual</FormLabel>
                         <FormControl>
-                          <Input type="password" {...field} />
+                          <Input type="password" {...field} placeholder="Necessária apenas para alteração de senha" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -281,7 +338,7 @@ export default function Account() {
                         <FormItem>
                           <FormLabel>Nova Senha</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} />
+                            <Input type="password" {...field} placeholder="Digite uma nova senha (opcional)" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -294,7 +351,7 @@ export default function Account() {
                         <FormItem>
                           <FormLabel>Confirmar Nova Senha</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} />
+                            <Input type="password" {...field} placeholder="Confirme a nova senha" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

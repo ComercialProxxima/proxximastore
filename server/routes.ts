@@ -579,21 +579,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
       
-      // Importar funções de autenticação
-      const { comparePasswords, hashPassword } = await import("./auth");
+      // Preparar dados de atualização
+      const updateData: any = {};
       
-      // Comparar senha atual se estiver alterando dados que exigem verificação
-      if (currentPassword) {
+      // Se estiver atualizando a senha, verificar a senha atual
+      if (newPassword) {
+        // Importar funções de autenticação
+        const { comparePasswords, hashPassword } = await import("./auth");
+        
+        // Se estiver mudando a senha, a senha atual é obrigatória
+        if (!currentPassword) {
+          return res.status(400).json({ message: "Senha atual é obrigatória para alterar a senha" });
+        }
+        
+        // Verificar se a senha atual está correta
         const passwordValid = await comparePasswords(currentPassword, user.password);
         if (!passwordValid) {
           return res.status(400).json({ message: "Senha atual incorreta" });
         }
+        
+        // Definir a nova senha
+        updateData.password = await hashPassword(newPassword);
       }
       
-      // Preparar dados de atualização
-      const updateData: any = {};
-      if (displayName !== undefined) updateData.displayName = displayName;
-      if (newPassword) updateData.password = await hashPassword(newPassword);
+      // Definir nome de exibição se fornecido
+      if (displayName !== undefined) {
+        updateData.displayName = displayName;
+      }
       
       // Se tiver uma nova imagem de perfil
       if (req.file) {
@@ -611,6 +623,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
         }
+      }
+      
+      // Verificar se há algo para atualizar
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ message: "Nenhum dado para atualizar foi fornecido" });
       }
       
       // Atualizar usuário

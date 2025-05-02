@@ -14,6 +14,7 @@ import MyPointsPage from "@/pages/MyPointsPage";
 import MyOrdersPage from "@/pages/MyOrdersPage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminProductsPage from "@/pages/admin/ProductsPage";
+import EmployeesPage from "@/pages/admin/EmployeesPage";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
                 {/* Rotas administrativas (apenas administradores) */}
                 <AdminRoute path="/admin" component={AdminDashboard} />
                 <AdminRoute path="/admin/products" component={AdminProductsPage} />
+                <AdminRoute path="/admin/employees" component={EmployeesPage} />
                 
                 {/* Página não encontrada */}
                 <Route component={NotFound} />

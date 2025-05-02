@@ -85,7 +85,7 @@ export default function Navbar() {
             <div className={`text-sm font-medium transition-colors hover:text-primary cursor-pointer ${
               location === "/my-points" ? "text-primary" : "text-muted-foreground"
             }`}>
-              Meus Pontos
+              Meus xCoins
             </div>
           </Link>
           
@@ -139,13 +139,13 @@ export default function Navbar() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/profile")}>
+              <DropdownMenuItem onClick={() => navigate("/account")}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Perfil</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/my-points")}>
                 <Award className="mr-2 h-4 w-4" />
-                <span>Pontos: {user?.points || 0}</span>
+                <span>xCoins: {user?.points || 0}</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/my-orders")}>
                 <Clock className="mr-2 h-4 w-4" />
@@ -180,7 +180,7 @@ export default function Navbar() {
                   <div>
                     <p className="text-sm font-medium">{user?.displayName || user?.username}</p>
                     <p className="text-xs text-muted-foreground">{user?.email}</p>
-                    <p className="text-xs font-medium mt-1">Pontos: {user?.points || 0}</p>
+                    <p className="text-xs font-medium mt-1">xCoins: {user?.points || 0}</p>
                   </div>
                 </div>
                 
@@ -195,7 +195,7 @@ export default function Navbar() {
                   <Link href="/my-points">
                     <div className="flex items-center py-2 px-1 rounded-md hover:bg-primary/10 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
                       <Award className="mr-2 h-5 w-5 text-secondary" />
-                      Meus Pontos
+                      Meus xCoins
                     </div>
                   </Link>
                   
@@ -206,7 +206,7 @@ export default function Navbar() {
                     </div>
                   </Link>
                   
-                  <Link href="/profile">
+                  <Link href="/account">
                     <div className="flex items-center py-2 px-1 rounded-md hover:bg-primary/10 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
                       <User className="mr-2 h-5 w-5 text-secondary" />
                       Meu Perfil

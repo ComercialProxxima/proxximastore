@@ -90,7 +90,7 @@ export default function Account() {
   return (
     <Layout>
       <div className="container mx-auto py-6 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-6">Perfil de Usuário</h1>
+        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Perfil de Usuário</h1>
         
         <Card>
           <CardHeader>
@@ -114,6 +114,11 @@ export default function Account() {
                 <p className="text-xs text-muted-foreground mt-1">
                   {user.role === "admin" ? "Administrador" : "Funcionário"}
                 </p>
+                <div className="mt-2">
+                  <span className="inline-flex items-center rounded-md bg-primary px-2 py-1 text-xs font-medium text-secondary">
+                    {user.points} xCoins
+                  </span>
+                </div>
               </div>
             </div>
             
@@ -201,7 +206,8 @@ export default function Account() {
                 
                 <div className="flex justify-end">
                   <Button 
-                    type="submit" 
+                    type="submit"
+                    className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
                     disabled={updateProfileMutation.isPending}
                   >
                     {updateProfileMutation.isPending ? (

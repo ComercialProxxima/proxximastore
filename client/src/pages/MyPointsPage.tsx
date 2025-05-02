@@ -216,13 +216,13 @@ export default function MyPointsPage() {
                         </Badge>
                       )}
                       {transaction.transactionType === "spent" && (
-                        <Badge className="bg-opacity-10 bg-primary text-primary hover:bg-opacity-20">
+                        <Badge className="bg-opacity-10 bg-secondary text-secondary hover:bg-opacity-20">
                           <TrendingDown className="h-3.5 w-3.5 mr-1" />
                           Gasto
                         </Badge>
                       )}
                       {transaction.transactionType === "adjusted" && (
-                        <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                        <Badge className="bg-gradient-to-r from-primary to-secondary text-white hover:bg-opacity-90">
                           Ajuste
                         </Badge>
                       )}
@@ -232,7 +232,7 @@ export default function MyPointsPage() {
                         className={
                           transaction.points > 0
                             ? "text-green-600"
-                            : "text-red-600"
+                            : "text-secondary"
                         }
                       >
                         {transaction.points > 0 ? "+" : ""}

@@ -22,7 +22,7 @@ import {
   FormLabel, 
   FormMessage 
 } from "@/components/ui/form";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Loader2 } from "lucide-react";
 
 // Schema para validação do formulário de login
@@ -43,7 +43,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
-  const [activeTab, setActiveTab] = useState<string>("login");
   const { user, loginMutation, registerMutation } = useAuth();
   const [location, navigate] = useLocation();
 
@@ -104,75 +103,65 @@ export default function AuthPage() {
             </p>
           </div>
 
-          <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-1 mb-6">
-              <TabsTrigger value="login" className="w-full">Login</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="login">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Acesse sua conta</CardTitle>
-                  <CardDescription>
-                    Entre com seu nome de usuário e senha para acessar o sistema.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...loginForm}>
-                    <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                      <FormField
-                        control={loginForm.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nome de usuário</FormLabel>
-                            <FormControl>
-                              <Input placeholder="nome_usuario" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={loginForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Senha</FormLabel>
-                            <FormControl>
-                              <Input type="password" placeholder="******" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button 
-                        type="submit" 
-                        className="w-full" 
-                        disabled={loginMutation.isPending}
-                      >
-                        {loginMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Entrando...
-                          </>
-                        ) : (
-                          "Entrar"
-                        )}
-                      </Button>
-                    </form>
-                  </Form>
-                </CardContent>
-                <CardFooter className="flex flex-col items-center justify-center">
-                  <p className="text-sm text-muted-foreground">
-                    Entre em contato com um administrador para criar sua conta.
-                  </p>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-
-
-          </Tabs>
+          <Card>
+            <CardHeader>
+              <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Acesse sua conta</CardTitle>
+              <CardDescription>
+                Entre com seu nome de usuário e senha para acessar o sistema.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...loginForm}>
+                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                  <FormField
+                    control={loginForm.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome de usuário</FormLabel>
+                        <FormControl>
+                          <Input placeholder="nome_usuario" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={loginForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Senha</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="******" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={loginMutation.isPending}
+                  >
+                    {loginMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Entrando...
+                      </>
+                    ) : (
+                      "Entrar"
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+            <CardFooter className="flex flex-col items-center justify-center">
+              <p className="text-sm text-muted-foreground">
+                Entre em contato com um administrador para criar sua conta.
+              </p>
+            </CardFooter>
+          </Card>
         </div>
       </div>
 

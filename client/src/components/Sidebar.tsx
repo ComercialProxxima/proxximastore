@@ -78,6 +78,12 @@ export default function Sidebar() {
       active: location === "/" || (isAdmin && location === "/admin")
     },
     {
+      href: "/",
+      icon: <Package className="h-5 w-5" />,
+      label: "Produtos",
+      active: !isAdmin && location === "/"
+    },
+    {
       href: "/my-points",
       icon: <Award className="h-5 w-5" />,
       label: "Meus Pontos",
@@ -159,7 +165,8 @@ export default function Sidebar() {
                   <ShoppingBag className="h-6 w-6 text-secondary mx-auto" />
                 ) : (
                   <>
-                    <div className="flex flex-col mr-2">
+                    <ShoppingBag className="h-6 w-6 text-secondary mr-2" />
+                    <div className="flex flex-col">
                       <span className="font-bold text-lg text-white">
                         Proxxima
                       </span>
@@ -167,7 +174,6 @@ export default function Sidebar() {
                         Store
                       </span>
                     </div>
-                    <ShoppingBag className="h-6 w-6 text-secondary" />
                   </>
                 )}
               </div>
@@ -229,7 +235,7 @@ export default function Sidebar() {
           {/* Menu principal */}
           <div className="flex-1 py-4 overflow-y-auto">
             <nav className="space-y-1 px-2">
-              {mainMenuItems.filter(item => !(isAdmin && item.href === "/")).map((item, index) => renderMenuItem(item, index))}
+              {mainMenuItems.map((item, index) => renderMenuItem(item, index))}
             </nav>
 
             {/* Menu do administrador */}
@@ -252,11 +258,11 @@ export default function Sidebar() {
             <Button 
               variant="outline" 
               className={`${isCollapsed ? 'justify-center w-full p-2' : 'justify-start w-full'} 
-                border-white/30 text-white hover:border-secondary hover:bg-secondary/20 hover:text-white
+                border-white/30 text-primary hover:border-secondary hover:bg-secondary/20 hover:text-primary
                 transition-all duration-300`}
               onClick={handleLogout}
             >
-              <LogOut className={`${isCollapsed ? '' : 'mr-2'} h-5 w-5 text-secondary`} />
+              <LogOut className={`${isCollapsed ? '' : 'mr-2'} h-5 w-5 text-primary`} />
               {!isCollapsed && <span>Sair</span>}
             </Button>
           </div>

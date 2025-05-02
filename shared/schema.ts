@@ -162,12 +162,13 @@ export const updateOrderSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-  displayName: z.string().optional(),
+  displayName: z.string().nullable().optional(),
   email: z.string().email().optional(),
   points: z.number().int().optional(),
   role: z.enum([UserRoleEnum.ADMIN, UserRoleEnum.EMPLOYEE]).optional(),
-  unit: z.string().optional(),
-  profileImageUrl: z.string().optional(),
+  unit: z.string().nullable().optional(),
+  profileImageUrl: z.string().nullable().optional(),
+  password: z.string().optional(),
 });
 
 // Type Exports

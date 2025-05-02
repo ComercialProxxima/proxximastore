@@ -82,12 +82,47 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUser(id: number, userData: UpdateUser): Promise<User | undefined> {
-    const [updatedUser] = await db
-      .update(users)
-      .set(userData)
-      .where(eq(users.id, id))
-      .returning();
-    return updatedUser;
+    console.log(`Atualizando usuário ID: ${id} com dados:`, userData);
+    try {
+      // Certifique-se de que campos nulos sejam tratados corretamente
+      const dataToUpdate: any = {};
+      
+      // Para cada campo no userData, verificamos se ele está definido (mesmo que seja null)
+      if (userData.displayName !== undefined) dataToUpdate.displayName = userData.displayName;
+      if (userData.email !== undefined) dataToUpdate.email = userData.email;
+      if (userData.points !== undefined) dataToUpdate.points = userData.points;
+      if (userData.role !== undefined) dataToUpdate.role = userData.role;
+      if (userData.unit !== undefined) dataToUpdate.unit = userData.unit;
+      if (userData.profileImageUrl !== undefined) dataToUpdate.profileImageUrl = userData.profileImageUrl;
+      if (userData.password !== undefined) dataToUpdate.password = userData.password;
+      
+      // Adicionamos um timestamp de atualização
+      dataToUpdate.updatedAt = new Date();
+      
+      console.log("Dados finais para atualização:", {
+        ...dataToUpdate,
+        password: dataToUpdate.password ? "[senha encriptada]" : undefined,
+        profileImageUrl: dataToUpdate.profileImageUrl ? "[imagem]" : null
+      });
+      
+      const result = await db
+        .update(users)
+        .set(dataToUpdate)
+        .where(eq(users.id, id))
+        .returning();
+      
+      console.log("Resultado da atualização:", result);
+      
+      if (result && result.length > 0) {
+        const [updatedUser] = result;
+        return updatedUser;
+      }
+      
+      return undefined;
+    } catch (error) {
+      console.error(`Erro ao atualizar usuário ID ${id}:`, error);
+      return undefined;
+    }
   }
 
   async getAllUsers(): Promise<User[]> {

@@ -101,15 +101,32 @@ export default function Account() {
   const onSubmit = (data: ProfileFormValues) => {
     console.log("Formulário enviado com dados:", data);
     
+    // Preparar os dados a serem enviados
+    const dataToSend = {
+      displayName: data.displayName,
+      unit: data.unit,
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword || undefined,
+      confirmPassword: data.confirmPassword || undefined,
+    };
+    
     // Se o usuário fez upload de uma imagem, incluímos o preview no envio
     if (imagePreview) {
-      data.profileImageUrl = imagePreview;
+      dataToSend.profileImageUrl = imagePreview;
     }
     
     // Se o usuário está removendo a imagem
     if (isRemoving) {
-      data.profileImageUrl = null;
+      dataToSend.profileImageUrl = null;
     }
+    
+    console.log("Dados preparados para envio:", {
+      ...dataToSend,
+      currentPassword: dataToSend.currentPassword ? "[senha]" : undefined,
+      newPassword: dataToSend.newPassword ? "[senha]" : undefined,
+      confirmPassword: dataToSend.confirmPassword ? "[senha]" : undefined,
+      profileImageUrl: dataToSend.profileImageUrl ? "[imagem]" : null
+    });
     
     // Mostrar toast antes de enviar
     toast({
@@ -118,7 +135,7 @@ export default function Account() {
     });
     
     // Verificar se temos todos os campos necessários
-    if (!data.currentPassword) {
+    if (!dataToSend.currentPassword) {
       toast({
         title: "Campo obrigatório",
         description: "A senha atual é necessária para salvar as alterações",
@@ -128,7 +145,7 @@ export default function Account() {
     }
     
     // Enviar dados
-    updateProfileMutation.mutate(data);
+    updateProfileMutation.mutate(dataToSend);
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {

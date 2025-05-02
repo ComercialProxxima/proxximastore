@@ -91,6 +91,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: `Erro ao buscar funcionários: ${error.message}` });
     }
   });
+  
+  // Update user (admin only)
+  app.patch("/api/admin/users/:id", isAdmin, async (req: Request, res: Response) => {
+    try {
+      const id = parseId(req.params.id);
+      
+      // Verificar se o usuário existe
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      // Importar hashPassword apenas se precisarmos atualizar a senha
+      let newPasswordHash;
+      if (req.body.password) {
+        const { hashPassword } = await import("./auth");
+        newPasswordHash = await hashPassword(req.body.password);
+      }
+      
+      // Preparar dados para atualização
+      const updateData: any = {};
+      if (req.body.username !== undefined) updateData.username = req.body.username;
+      if (req.body.email !== undefined) updateData.email = req.body.email;
+      if (req.body.displayName !== undefined) updateData.displayName = req.body.displayName;
+      if (req.body.role !== undefined) updateData.role = req.body.role;
+      if (req.body.unit !== undefined) updateData.unit = req.body.unit;
+      if (newPasswordHash) updateData.password = newPasswordHash;
+      
+      // Atualizar o usuário
+      const updatedUser = await storage.updateUser(id, updateData);
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Falha ao atualizar usuário" });
+      }
+      
+      // Não enviar hash de senha para o cliente
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      res.status(200).json(userWithoutPassword);
+    } catch (error) {
+      console.error("Erro ao atualizar usuário:", error);
+      res.status(500).json({ message: `Erro ao atualizar usuário: ${error.message}` });
+    }
+  });
+  
+  // Delete user (admin only)
+  app.delete("/api/admin/users/:id", isAdmin, async (req: Request, res: Response) => {
+    try {
+      const id = parseId(req.params.id);
+      
+      // Verificar se não está tentando excluir a si mesmo
+      if (req.user && req.user.id === id) {
+        return res.status(400).json({ message: "Não é possível excluir o próprio usuário" });
+      }
+      
+      // Verificar se o usuário existe
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      // Excluir o usuário
+      const isDeleted = await storage.deleteUser(id);
+      if (!isDeleted) {
+        return res.status(500).json({ message: "Falha ao excluir usuário" });
+      }
+      
+      res.status(200).json({ message: "Usuário excluído com sucesso" });
+    } catch (error) {
+      console.error("Erro ao excluir usuário:", error);
+      res.status(500).json({ message: `Erro ao excluir usuário: ${error.message}` });
+    }
+  });
 
   // Update user points (admin only)
   app.patch("/api/admin/users/:id/points", isAdmin, async (req: Request, res: Response) => {

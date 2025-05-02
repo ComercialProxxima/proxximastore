@@ -54,7 +54,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, PlusCircle, UserPlus } from "lucide-react";
+import { 
+  Loader2, 
+  PlusCircle, 
+  UserPlus, 
+  Pencil, 
+  Trash2, 
+  MoreHorizontal
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -80,12 +95,28 @@ const registerSchema = z.object({
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
+// Schema para o formulário de edição
+const editUserSchema = z.object({
+  username: z.string().min(3, "O nome de usuário deve ter pelo menos 3 caracteres"),
+  email: z.string().email("Email inválido"),
+  displayName: z.string().optional(),
+  unit: z.string().optional(),
+  role: z.enum([UserRoleEnum.ADMIN, UserRoleEnum.EMPLOYEE]),
+  password: z.string().optional().refine(val => !val || val.length >= 6, {
+    message: "A senha deve ter pelo menos 6 caracteres"
+  }),
+});
+
+type EditUserFormValues = z.infer<typeof editUserSchema>;
+
 export default function EmployeesPage() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user: currentUser } = useAuth();
   const { toast } = useToast();
   const [selectedEmployee, setSelectedEmployee] = useState<User | null>(null);
   const [isPointsDialogOpen, setIsPointsDialogOpen] = useState(false);
   const [isRegisterDialogOpen, setIsRegisterDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Consulta para obter todos os funcionários
   const { data: employees, isLoading, error } = useQuery<User[]>({
@@ -138,6 +169,19 @@ export default function EmployeesPage() {
     },
   });
 
+  // Formulário para editar funcionário
+  const editForm = useForm<EditUserFormValues>({
+    resolver: zodResolver(editUserSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      displayName: "",
+      unit: "",
+      role: UserRoleEnum.EMPLOYEE,
+      password: "",
+    },
+  });
+
   // Mutação para registrar novo funcionário
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterFormValues) => {
@@ -157,6 +201,54 @@ export default function EmployeesPage() {
       toast({
         title: "Erro ao registrar funcionário",
         description: error.message || "Não foi possível criar a conta. Tente outro nome de usuário.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Mutação para editar usuário
+  const editUserMutation = useMutation({
+    mutationFn: async (data: { id: number; userData: EditUserFormValues }) => {
+      const res = await apiRequest("PATCH", `/api/admin/users/${data.id}`, data.userData);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/employees'] });
+      setIsEditDialogOpen(false);
+      editForm.reset();
+      toast({
+        title: "Usuário atualizado com sucesso",
+        description: "As informações do usuário foram atualizadas.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao atualizar usuário",
+        description: error.message || "Não foi possível atualizar o usuário.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Mutação para excluir usuário
+  const deleteUserMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("DELETE", `/api/admin/users/${id}`);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/employees'] });
+      setIsDeleteDialogOpen(false);
+      setSelectedEmployee(null);
+      toast({
+        title: "Usuário excluído com sucesso",
+        description: "O usuário foi removido do sistema.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao excluir usuário",
+        description: error.message || "Não foi possível excluir o usuário.",
         variant: "destructive",
       });
     },
@@ -182,6 +274,49 @@ export default function EmployeesPage() {
   // Handler para o envio do formulário de registro
   const onSubmitRegister = (values: RegisterFormValues) => {
     registerMutation.mutate(values);
+  };
+  
+  // Handler para abrir o diálogo de edição de usuário
+  const handleOpenEditDialog = (employee: User) => {
+    setSelectedEmployee(employee);
+    // Preencher o formulário com os dados atuais do funcionário
+    editForm.reset({
+      username: employee.username,
+      email: employee.email,
+      displayName: employee.displayName || "",
+      unit: employee.unit || "",
+      role: employee.role,
+      password: "", // Senha em branco para não alterar a senha atual
+    });
+    setIsEditDialogOpen(true);
+  };
+  
+  // Handler para o envio do formulário de edição
+  const onSubmitEdit = (values: EditUserFormValues) => {
+    if (!selectedEmployee) return;
+    
+    // Remover campos vazios para que não sejam enviados para o servidor
+    const userData = { ...values };
+    if (!userData.password) delete userData.password;
+    if (!userData.displayName) delete userData.displayName;
+    if (!userData.unit) delete userData.unit;
+    
+    editUserMutation.mutate({
+      id: selectedEmployee.id,
+      userData
+    });
+  };
+  
+  // Handler para abrir o diálogo de exclusão
+  const handleOpenDeleteDialog = (employee: User) => {
+    setSelectedEmployee(employee);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  // Handler para confirmar a exclusão
+  const handleConfirmDelete = () => {
+    if (!selectedEmployee) return;
+    deleteUserMutation.mutate(selectedEmployee.id);
   };
 
   if (isLoading) {
@@ -247,14 +382,40 @@ export default function EmployeesPage() {
                           "N/A"}
                       </TableCell>
                       <TableCell>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => handleOpenPointsDialog(employee)}
-                        >
-                          <PlusCircle className="h-4 w-4 mr-1" />
-                          Adicionar xCoins
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleOpenPointsDialog(employee)}
+                          >
+                            <PlusCircle className="h-4 w-4 mr-1" />
+                            Adicionar xCoins
+                          </Button>
+                          
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleOpenEditDialog(employee)}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleOpenDeleteDialog(employee)}
+                                disabled={currentUser?.id === employee.id} // Impedir exclusão do próprio usuário
+                                className={currentUser?.id === employee.id ? "text-gray-400" : "text-red-600"}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -465,6 +626,189 @@ export default function EmployeesPage() {
               </DialogFooter>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para editar funcionário */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Editar Funcionário</DialogTitle>
+            <DialogDescription>
+              Atualize as informações do funcionário {selectedEmployee?.displayName || selectedEmployee?.username}.
+              Deixe o campo de senha em branco para manter a senha atual.
+            </DialogDescription>
+          </DialogHeader>
+
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(onSubmitEdit)} className="space-y-4">
+              <FormField
+                control={editForm.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome de usuário</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="nome_usuario" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" {...field} placeholder="funcionario@exemplo.com" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="displayName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome de exibição (opcional)</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Nome Completo" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={editForm.control}
+                name="unit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Unidade (opcional)</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Ex: Financeiro, Marketing, etc" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nova senha (opcional)</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} placeholder="Deixe em branco para manter a atual" />
+                    </FormControl>
+                    <FormDescription>
+                      Deixe em branco para manter a senha atual
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Função</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma função" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={UserRoleEnum.EMPLOYEE}>Funcionário</SelectItem>
+                        <SelectItem value={UserRoleEnum.ADMIN}>Administrador</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsEditDialogOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={editUserMutation.isPending}
+                >
+                  {editUserMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    "Salvar Alterações"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para confirmar exclusão */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir Funcionário</DialogTitle>
+            <DialogDescription>
+              Esta ação não pode ser desfeita. Isso excluirá permanentemente o funcionário 
+              {selectedEmployee ? ` ${selectedEmployee.displayName || selectedEmployee.username}` : ''} e
+              todos os seus dados do sistema.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-4 py-4">
+            <p className="text-destructive font-medium">
+              Tem certeza que deseja excluir este funcionário?
+            </p>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="button" 
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={deleteUserMutation.isPending}
+            >
+              {deleteUserMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                "Sim, excluir"
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </Layout>

@@ -210,19 +210,19 @@ export default function MyPointsPage() {
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>
                       {transaction.transactionType === "earned" && (
-                        <Badge className="bg-opacity-10 bg-secondary text-secondary hover:bg-opacity-20">
+                        <Badge className="bg-green-600 text-white border-0">
                           <TrendingUp className="h-3.5 w-3.5 mr-1" />
                           Recebido
                         </Badge>
                       )}
                       {transaction.transactionType === "spent" && (
-                        <Badge className="bg-opacity-10 bg-secondary text-secondary hover:bg-opacity-20">
+                        <Badge className="bg-primary text-secondary border-0">
                           <TrendingDown className="h-3.5 w-3.5 mr-1" />
                           Gasto
                         </Badge>
                       )}
                       {transaction.transactionType === "adjusted" && (
-                        <Badge className="bg-gradient-to-r from-primary to-secondary text-white hover:bg-opacity-90">
+                        <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0">
                           Ajuste
                         </Badge>
                       )}

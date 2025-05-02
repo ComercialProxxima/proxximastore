@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -12,8 +12,9 @@ import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import Layout from "@/components/Layout";
-import { Loader2, User as UserIcon } from "lucide-react";
+import { Loader2, User as UserIcon, Camera, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 const profileSchema = z.object({
   displayName: z.string().min(3, "O nome de exibição deve ter pelo menos 3 caracteres").optional().nullable(),
@@ -35,6 +36,9 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 export default function Account() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(user?.profileImageUrl || null);
   
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -48,7 +52,29 @@ export default function Account() {
   
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormValues) => {
-      const res = await apiRequest("PATCH", "/api/protected/profile", data);
+      const formData = new FormData();
+      
+      // Adicionar campos de texto ao FormData
+      if (data.displayName) formData.append("displayName", data.displayName);
+      if (data.currentPassword) formData.append("currentPassword", data.currentPassword);
+      if (data.newPassword) formData.append("newPassword", data.newPassword);
+      
+      // Adicionar imagem se existir
+      if (selectedImage) {
+        formData.append("profileImage", selectedImage);
+      }
+      
+      const res = await fetch("/api/protected/profile", {
+        method: "PATCH",
+        body: formData,
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Erro ao atualizar perfil");
+      }
+      
       return await res.json();
     },
     onSuccess: () => {
@@ -63,6 +89,9 @@ export default function Account() {
         newPassword: "",
         confirmPassword: "",
       });
+      
+      // Limpar imagem selecionada após sucesso
+      setSelectedImage(null);
     },
     onError: (error: Error) => {
       toast({
@@ -72,6 +101,34 @@ export default function Account() {
       });
     },
   });
+  
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedImage(file);
+      
+      // Criar URL de preview para a imagem selecionada
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewUrl(objectUrl);
+      
+      // Limpar URL quando o componente for desmontado
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+  };
+  
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+  
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
   
   const onSubmit = (data: ProfileFormValues) => {
     updateProfileMutation.mutate(data);
@@ -99,15 +156,54 @@ export default function Account() {
           </CardHeader>
           
           <CardContent className="space-y-6">
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-16 w-16">
-                <AvatarFallback className="bg-primary text-white text-lg">
-                  {user.displayName ? 
-                    user.displayName.split(' ').map(name => name[0]).join('').toUpperCase() : 
-                    <UserIcon className="h-6 w-6" />
-                  }
-                </AvatarFallback>
-              </Avatar>
+            <div className="flex items-start space-x-4">
+              <div className="relative group">
+                <Avatar className="h-24 w-24 cursor-pointer border-2 border-primary/20 hover:border-primary/50 transition-colors duration-200">
+                  {previewUrl ? (
+                    <AvatarImage src={previewUrl} alt="Foto de perfil" />
+                  ) : (
+                    <AvatarFallback className="bg-primary text-white text-xl">
+                      {user.displayName ? 
+                        user.displayName.split(' ').map(name => name[0]).join('').toUpperCase() : 
+                        <UserIcon className="h-10 w-10" />
+                      }
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                
+                <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/50 text-white transition-opacity duration-200">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="icon" 
+                    className="rounded-full" 
+                    onClick={triggerFileInput}
+                  >
+                    <Camera className="h-5 w-5" />
+                  </Button>
+                  
+                  {previewUrl && (
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full ml-1" 
+                      onClick={handleRemoveImage}
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                  )}
+                </div>
+                
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={handleImageChange}
+                />
+              </div>
+              
               <div>
                 <h3 className="text-lg font-medium">{user.displayName || user.username}</h3>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
@@ -118,6 +214,9 @@ export default function Account() {
                   <span className="inline-flex items-center rounded-md bg-primary px-2 py-1 text-xs font-medium text-secondary">
                     {user.points} xCoins
                   </span>
+                </div>
+                <div className="mt-3">
+                  <p className="text-xs text-muted-foreground">Clique na imagem para alterar sua foto de perfil</p>
                 </div>
               </div>
             </div>

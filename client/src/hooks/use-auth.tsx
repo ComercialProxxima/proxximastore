@@ -14,6 +14,7 @@ export type User = {
   username: string;
   email: string;
   displayName: string | null;
+  profileImageUrl: string | null;
   role: typeof UserRoleEnum.ADMIN | typeof UserRoleEnum.EMPLOYEE;
   points: number;
   createdAt: string | null;

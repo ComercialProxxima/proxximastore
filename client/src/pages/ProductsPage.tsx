@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -13,11 +14,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShoppingCart, Tag, Package } from "lucide-react";
+import DataTableHeader from "@/components/DataTableHeader";
 
 export default function ProductsPage() {
   const { user } = useAuth();
   const [location, navigate] = useLocation();
-  // Não precisamos mais desses estados já que usamos a página de checkout
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Buscar produtos
   const { data: products, isLoading, error } = useQuery<Product[]>({
@@ -27,6 +29,42 @@ export default function ProductsPage() {
   // Função para redirecionar para a página de checkout
   const openPurchaseDialog = (product: Product) => {
     navigate(`/checkout/${product.id}`);
+  };
+  
+  // Filtrar produtos com base na pesquisa
+  const filteredProducts = useMemo(() => {
+    if (!products) return [];
+    
+    // Filtrar apenas produtos ativos
+    const activeProducts = products.filter(product => product.isActive);
+    
+    if (!searchQuery) {
+      return activeProducts;
+    }
+    
+    const query = searchQuery.toLowerCase();
+    return activeProducts.filter(product => 
+      // Pesquisa pelo nome
+      product.name.toLowerCase().includes(query) ||
+      // Pesquisa pela descrição
+      (product.description?.toLowerCase() || "").includes(query) ||
+      // Pesquisa pelo custo de pontos
+      product.pointsCost.toString().includes(query)
+    );
+  }, [products, searchQuery]);
+  
+  // Função para gerar dados para exportação
+  const getExportData = () => {
+    if (!filteredProducts) return [];
+    
+    return filteredProducts.map(product => ({
+      ID: product.id,
+      Nome: product.name,
+      Descrição: product.description || "Sem descrição",
+      'Custo (xCoins)': product.pointsCost,
+      Estoque: product.stock,
+      Status: product.isActive ? "Ativo" : "Inativo"
+    }));
   };
 
   // Renderizar estado de carregamento

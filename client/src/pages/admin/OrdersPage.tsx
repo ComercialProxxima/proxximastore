@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Eye } from "lucide-react";
+import DataTableHeader from "@/components/DataTableHeader";
 
 // Layout
 import Layout from "@/components/Layout";
@@ -86,6 +87,7 @@ export default function OrdersPage() {
   const { toast } = useToast();
   const [selectedOrder, setSelectedOrder] = useState<number | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Consulta para obter todos os pedidos
   const { data: orders, isLoading: isOrdersLoading } = useQuery<OrderWithUser[]>({
@@ -169,6 +171,45 @@ export default function OrdersPage() {
         return "default";
     }
   };
+  
+  // Filtrar os pedidos com base na pesquisa
+  const filteredOrders = useMemo(() => {
+    if (!orders) return [];
+    
+    if (!searchQuery) {
+      return orders;
+    }
+    
+    const query = searchQuery.toLowerCase();
+    return orders.filter(order => 
+      // Pesquisa pelo ID
+      order.id.toString().includes(query) ||
+      // Pesquisa pelo nome do funcionário
+      (order.user.displayName?.toLowerCase() || "").includes(query) ||
+      // Pesquisa pelo username
+      order.user.username.toLowerCase().includes(query) ||
+      // Pesquisa pelo email
+      order.user.email.toLowerCase().includes(query) ||
+      // Pesquisa pelo status
+      formatStatus(order.status).toLowerCase().includes(query) ||
+      // Pesquisa pela data de criação
+      format(new Date(order.createdAt), "dd/MM/yyyy", { locale: ptBR }).includes(query)
+    );
+  }, [orders, searchQuery]);
+  
+  // Função para gerar dados para exportação
+  const getExportData = () => {
+    if (!filteredOrders) return [];
+    
+    return filteredOrders.map(order => ({
+      ID: order.id,
+      Funcionário: order.user.displayName || order.user.username,
+      Email: order.user.email,
+      'Data do Pedido': format(new Date(order.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+      'Total de Pontos': order.totalPoints,
+      Status: formatStatus(order.status)
+    }));
+  };
 
   if (isOrdersLoading) {
     return (
@@ -183,13 +224,24 @@ export default function OrdersPage() {
   return (
     <Layout>
       <div className="container mx-auto py-6">
-        <h1 className="text-3xl font-bold mb-6">Gerenciar Pedidos</h1>
+        <DataTableHeader 
+          title="Gerenciar Pedidos"
+          description="Visualize e gerencie todos os pedidos realizados no sistema"
+          onSearch={setSearchQuery}
+          onExport={getExportData}
+          exportFileName="pedidos-exportados"
+        />
 
         {orders && orders.length > 0 ? (
           <Card>
             <CardContent className="p-0">
               <Table>
-                <TableCaption>Lista de pedidos realizados</TableCaption>
+                <TableCaption>
+                  {filteredOrders.length} 
+                  {filteredOrders.length === 1 
+                    ? ' pedido encontrado' 
+                    : ' pedidos encontrados'}
+                </TableCaption>
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
@@ -201,7 +253,7 @@ export default function OrdersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orders.map((order) => (
+                  {filteredOrders.map((order) => (
                     <TableRow key={order.id}>
                       <TableCell>#{order.id}</TableCell>
                       <TableCell>

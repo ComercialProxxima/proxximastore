@@ -147,11 +147,11 @@ export default function MyOrdersPage() {
           </CardContent>
         </Card>
 
-        {/* Pontos gastos */}
+        {/* xCoins gastos */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Pontos Utilizados</CardTitle>
-            <CardDescription>Total de pontos utilizados em pedidos</CardDescription>
+            <CardTitle className="text-lg">xCoins Utilizados</CardTitle>
+            <CardDescription>Total de xCoins utilizados em pedidos</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
@@ -205,7 +205,7 @@ export default function MyOrdersPage() {
                   <TableRow>
                     <TableHead>Nº do Pedido</TableHead>
                     <TableHead>Data</TableHead>
-                    <TableHead>Pontos</TableHead>
+                    <TableHead>xCoins</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>

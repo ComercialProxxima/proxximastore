@@ -109,9 +109,9 @@ export default function MyPointsPage() {
   return (
     <Layout>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Meus Pontos</h1>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Meus xCoins</h1>
         <p className="text-muted-foreground">
-          Visualize seu saldo de pontos e histórico de transações
+          Visualize seu saldo de xCoins e histórico de transações
         </p>
       </div>
 
@@ -120,12 +120,12 @@ export default function MyPointsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg text-primary">Saldo Atual</CardTitle>
-            <CardDescription>Seus pontos disponíveis</CardDescription>
+            <CardDescription>Seus xCoins disponíveis</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-end">
               <span className="text-3xl font-bold text-primary">{user?.points || 0}</span>
-              <span className="text-muted-foreground ml-2 mb-1">pontos</span>
+              <span className="text-muted-foreground ml-2 mb-1">xCoins</span>
             </div>
           </CardContent>
         </Card>
@@ -134,12 +134,12 @@ export default function MyPointsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg text-secondary">Total Ganho</CardTitle>
-            <CardDescription>Pontos acumulados</CardDescription>
+            <CardDescription>xCoins acumulados</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-end">
               <span className="text-3xl font-bold text-secondary">{stats.earned}</span>
-              <span className="text-muted-foreground ml-2 mb-1">pontos</span>
+              <span className="text-muted-foreground ml-2 mb-1">xCoins</span>
             </div>
           </CardContent>
         </Card>
@@ -148,12 +148,12 @@ export default function MyPointsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg text-primary">Total Gasto</CardTitle>
-            <CardDescription>Pontos utilizados em trocas</CardDescription>
+            <CardDescription>xCoins utilizados em trocas</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-end">
               <span className="text-3xl font-bold text-primary">{stats.spent}</span>
-              <span className="text-muted-foreground ml-2 mb-1">pontos</span>
+              <span className="text-muted-foreground ml-2 mb-1">xCoins</span>
             </div>
           </CardContent>
         </Card>
@@ -172,8 +172,8 @@ export default function MyPointsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os tipos</SelectItem>
-                <SelectItem value="earned">Pontos ganhos</SelectItem>
-                <SelectItem value="spent">Pontos gastos</SelectItem>
+                <SelectItem value="earned">xCoins ganhos</SelectItem>
+                <SelectItem value="spent">xCoins gastos</SelectItem>
                 <SelectItem value="adjusted">Ajustes</SelectItem>
               </SelectContent>
             </Select>
@@ -186,7 +186,7 @@ export default function MyPointsPage() {
             <h3 className="mt-4 text-lg font-medium">Nenhuma transação encontrada</h3>
             <p className="mt-2 text-muted-foreground max-w-md mx-auto">
               {transactionType === "all"
-                ? "Você ainda não possui nenhum histórico de pontos."
+                ? "Você ainda não possui nenhum histórico de xCoins."
                 : `Você ainda não possui nenhuma transação do tipo selecionado.`}
             </p>
           </div>
@@ -198,7 +198,7 @@ export default function MyPointsPage() {
                   <TableHead>Data</TableHead>
                   <TableHead>Descrição</TableHead>
                   <TableHead>Tipo</TableHead>
-                  <TableHead className="text-right">Pontos</TableHead>
+                  <TableHead className="text-right">xCoins</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

@@ -103,8 +103,8 @@ export default function CheckoutPage() {
       let errorMsg = "Ocorreu um erro ao processar seu pedido.";
       
       // Verificar se a mensagem de erro contém informações sobre pontos insuficientes
-      if (error.message.includes("Pontos insuficientes")) {
-        errorMsg = "Você não tem pontos suficientes para este pedido.";
+      if (error.message.includes("xCoins insuficientes")) {
+        errorMsg = "Você não tem xCoins suficientes para este pedido.";
       } else if (error.message.includes("Estoque insuficiente")) {
         errorMsg = "Estoque insuficiente para este produto.";
       }
@@ -211,7 +211,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex justify-between py-1 text-sm">
                     <span>Total:</span>
-                    <span className="font-medium">{(product.pointsCost * quantity).toLocaleString("pt-BR")} pontos</span>
+                    <span className="font-medium">{(product.pointsCost * quantity).toLocaleString("pt-BR")} xCoins</span>
                   </div>
                   <div className="flex justify-between py-1 text-sm">
                     <span>Número do pedido:</span>
@@ -234,10 +234,10 @@ export default function CheckoutPage() {
     );
   }
 
-  // Calcular total de pontos
+  // Calcular total de xCoins
   const totalPoints = product.pointsCost * quantity;
 
-  // Verificar se o usuário tem pontos suficientes
+  // Verificar se o usuário tem xCoins suficientes
   const hasEnoughPoints = user?.points !== undefined && user.points >= totalPoints;
 
   return (
@@ -270,7 +270,7 @@ export default function CheckoutPage() {
                   <TableRow>
                     <TableHead>Produto</TableHead>
                     <TableHead className="text-center">Quantidade</TableHead>
-                    <TableHead className="text-right">Pontos (un.)</TableHead>
+                    <TableHead className="text-right">xCoins (un.)</TableHead>
                     <TableHead className="text-right">Total</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -345,15 +345,15 @@ export default function CheckoutPage() {
               <div>
                 <h3 className="text-lg font-medium mb-2 text-primary">Resumo</h3>
                 <p className="text-sm text-muted-foreground">
-                  Pontos disponíveis: <span className="text-primary font-medium">{user?.points?.toLocaleString("pt-BR") || 0}</span>
+                  xCoins disponíveis: <span className="text-primary font-medium">{user?.points?.toLocaleString("pt-BR") || 0}</span>
                 </p>
               </div>
               <div className="mt-4 sm:mt-0 flex flex-col items-end">
                 <div className="text-lg font-medium text-secondary">
-                  Total: <span className="font-semibold">{totalPoints.toLocaleString("pt-BR")}</span> pontos
+                  Total: <span className="font-semibold">{totalPoints.toLocaleString("pt-BR")}</span> xCoins
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Restante após pedido: {user && (user.points - totalPoints > 0 ? (user.points - totalPoints).toLocaleString("pt-BR") : 0)} pontos
+                  Restante após pedido: {user && (user.points - totalPoints > 0 ? (user.points - totalPoints).toLocaleString("pt-BR") : 0)} xCoins
                 </p>
               </div>
             </div>
@@ -361,9 +361,9 @@ export default function CheckoutPage() {
             {!hasEnoughPoints && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Pontos insuficientes</AlertTitle>
+                <AlertTitle>xCoins insuficientes</AlertTitle>
                 <AlertDescription>
-                  Você não possui pontos suficientes para fazer este pedido.
+                  Você não possui xCoins suficientes para fazer este pedido.
                 </AlertDescription>
               </Alert>
             )}

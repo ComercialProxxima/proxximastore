@@ -62,7 +62,7 @@ export default function ProductsPage() {
           <Package className="mx-auto h-12 w-12 text-secondary opacity-40" />
           <h2 className="mt-4 text-lg font-medium text-primary">Nenhum produto disponível</h2>
           <p className="mt-2 text-muted-foreground">
-            Ainda não há produtos disponíveis para troca por pontos.
+            Ainda não há produtos disponíveis para troca por xCoins.
           </p>
         </div>
       </Layout>
@@ -75,7 +75,7 @@ export default function ProductsPage() {
         <div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Produtos Disponíveis</h1>
           <p className="text-muted-foreground">
-            Troque seus pontos (<span className="font-semibold text-secondary">{user?.points || 0}</span> disponíveis) por produtos exclusivos
+            Troque seus xCoins (<span className="font-semibold text-secondary">{user?.points || 0}</span> disponíveis) por produtos exclusivos
           </p>
         </div>
       </div>
@@ -102,7 +102,7 @@ export default function ProductsPage() {
                   variant="secondary"
                 >
                   <Tag className="h-3.5 w-3.5 mr-1" />
-                  {product.pointsCost} pontos
+                  {product.pointsCost} xCoins
                 </Badge>
               </div>
               <CardHeader className="pb-2">
@@ -130,7 +130,7 @@ export default function ProductsPage() {
                   disabled={product.stock === 0 || (user?.points || 0) < product.pointsCost}
                 >
                   <ShoppingCart className="h-4 w-4 mr-2" />
-                  Trocar por Pontos
+                  Trocar por xCoins
                 </Button>
               </CardFooter>
             </Card>

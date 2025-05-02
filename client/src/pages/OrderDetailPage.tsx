@@ -196,7 +196,7 @@ export default function OrderDetailPage() {
                   <TableRow>
                     <TableHead>Produto</TableHead>
                     <TableHead className="text-center">Quantidade</TableHead>
-                    <TableHead className="text-right">Pontos (un.)</TableHead>
+                    <TableHead className="text-right">xCoins (un.)</TableHead>
                     <TableHead className="text-right">Total</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -248,7 +248,7 @@ export default function OrderDetailPage() {
               </div>
               <div className="mt-4 sm:mt-0 flex flex-col items-end">
                 <div className="text-lg font-medium text-secondary">
-                  Total: <span className="font-semibold">{orderDetail.order.totalPoints.toLocaleString("pt-BR")}</span> pontos
+                  Total: <span className="font-semibold">{orderDetail.order.totalPoints.toLocaleString("pt-BR")}</span> xCoins
                 </div>
               </div>
             </div>

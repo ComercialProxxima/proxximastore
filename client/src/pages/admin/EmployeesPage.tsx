@@ -61,9 +61,9 @@ import { ptBR } from "date-fns/locale";
 // Layout
 import Layout from "@/components/Layout";
 
-// Schema para o formulário de adicionar pontos
+// Schema para o formulário de adicionar xCoins
 const pointsFormSchema = z.object({
-  points: z.coerce.number().int().min(1, "Mínimo de 1 ponto"),
+  points: z.coerce.number().int().min(1, "Mínimo de 1 xCoin"),
   description: z.string().min(3, "Descrição é obrigatória"),
 });
 
@@ -93,7 +93,7 @@ export default function EmployeesPage() {
     enabled: !!isAdmin,
   });
 
-  // Formulário para adicionar pontos
+  // Formulário para adicionar xCoins
   const pointsForm = useForm<PointsFormValues>({
     resolver: zodResolver(pointsFormSchema),
     defaultValues: {
@@ -114,7 +114,7 @@ export default function EmployeesPage() {
     },
   });
 
-  // Mutação para adicionar pontos
+  // Mutação para adicionar xCoins
   const addPointsMutation = useMutation({
     mutationFn: async ({ userId, points, description }: { userId: number; points: number; description: string }) => {
       const res = await apiRequest("PATCH", `/api/admin/users/${userId}/points`, { points, description });
@@ -125,13 +125,13 @@ export default function EmployeesPage() {
       setIsPointsDialogOpen(false);
       pointsForm.reset();
       toast({
-        title: "Pontos adicionados com sucesso",
-        description: "Os pontos foram creditados na conta do funcionário.",
+        title: "xCoins adicionados com sucesso",
+        description: "Os xCoins foram creditados na conta do funcionário.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Erro ao adicionar pontos",
+        title: "Erro ao adicionar xCoins",
         description: error.message,
         variant: "destructive",
       });
@@ -162,13 +162,13 @@ export default function EmployeesPage() {
     },
   });
 
-  // Handler para abrir o diálogo de adicionar pontos
+  // Handler para abrir o diálogo de adicionar xCoins
   const handleOpenPointsDialog = (employee: User) => {
     setSelectedEmployee(employee);
     setIsPointsDialogOpen(true);
   };
 
-  // Handler para o envio do formulário de pontos
+  // Handler para o envio do formulário de xCoins
   const onSubmitPoints = (values: PointsFormValues) => {
     if (!selectedEmployee) return;
     
@@ -225,7 +225,7 @@ export default function EmployeesPage() {
                     <TableHead>Nome</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Função</TableHead>
-                    <TableHead>Pontos</TableHead>
+                    <TableHead>xCoins</TableHead>
                     <TableHead>Data de Registro</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
@@ -253,7 +253,7 @@ export default function EmployeesPage() {
                           onClick={() => handleOpenPointsDialog(employee)}
                         >
                           <PlusCircle className="h-4 w-4 mr-1" />
-                          Adicionar Pontos
+                          Adicionar xCoins
                         </Button>
                       </TableCell>
                     </TableRow>

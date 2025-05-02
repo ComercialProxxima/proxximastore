@@ -150,9 +150,9 @@ export default function Sidebar() {
       <div className={sidebarClass}>
         <div className="flex flex-col h-full">
           {/* Header com logo */}
-          <div className={`p-4 ${isCollapsed ? 'items-center justify-center' : ''} flex border-b border-white/20`}>
-            <Link href={isAdmin ? "/admin" : "/"}>
-              <div className={`flex ${isCollapsed ? 'justify-center' : 'flex-col'} cursor-pointer`}>
+          <div className={`p-4 ${isCollapsed ? 'items-center justify-center' : 'flex justify-center'} border-b border-white/20 relative`}>
+            <Link href={isAdmin ? "/admin" : "/"} className="flex items-center justify-center mx-auto">
+              <div className={`flex ${isCollapsed ? 'justify-center' : 'flex-col'} cursor-pointer items-center`}>
                 <Package className="h-6 w-6 text-secondary mx-auto" />
                 {!isCollapsed && (
                   <div className="flex flex-col mt-2 text-center">
@@ -170,7 +170,7 @@ export default function Sidebar() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="ml-auto text-white hover:text-secondary hover:bg-secondary/10"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-secondary hover:bg-secondary/10"
                 onClick={() => setIsCollapsed(!isCollapsed)}
               >
                 {isCollapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}

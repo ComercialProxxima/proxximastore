@@ -185,6 +185,11 @@ export default function Sidebar() {
                 <div>
                   <p className="font-medium text-sm">{user?.displayName || user?.username}</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  {user?.unit && (
+                    <p className="text-xs mt-1 bg-muted inline-block px-2 py-0.5 rounded-sm">
+                      {user.unit}
+                    </p>
+                  )}
                   <div className="flex items-center mt-1">
                     <Award className="w-4 h-4 mr-1 text-secondary" />
                     <span className="text-xs font-medium">{user?.points || 0} pontos</span>

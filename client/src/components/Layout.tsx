@@ -18,7 +18,7 @@ export default function Layout({ children }: LayoutProps) {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Loja Corporativa - Sistema de recompensas
+              © {new Date().getFullYear()} Proxxima Store - Sistema de recompensas
             </p>
             <div className="mt-4 md:mt-0 text-sm text-muted-foreground">
               Desenvolvido para gerenciamento de pontos e produtos

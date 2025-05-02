@@ -61,7 +61,7 @@ export default function Navbar() {
           <Link href="/">
             <div className="flex items-center space-x-2 cursor-pointer">
               <Package className="h-6 w-6 text-secondary" /> {/* Rosa #E6007D */}
-              <span className="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Loja Corporativa</span> {/* Gradiente do azul #2C2C83 para rosa #E6007D */}
+              <span className="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Proxxima Store</span> {/* Gradiente do azul #2C2C83 para rosa #E6007D */}
             </div>
           </Link>
           {isAdmin && (
@@ -174,7 +174,7 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Loja Corporativa</SheetTitle>
+                <SheetTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Proxxima Store</SheetTitle>
               </SheetHeader>
               <div className="py-4 space-y-4">
                 <div className="flex items-center space-x-2 mb-6">

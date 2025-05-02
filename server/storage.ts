@@ -24,6 +24,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: UpdateUser): Promise<User | undefined>;
+  deleteUser(id: number): Promise<boolean>;
   getAllUsers(): Promise<User[]>;
   getEmployees(): Promise<User[]>;
   
@@ -134,6 +135,21 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(eq(users.role, UserRoleEnum.EMPLOYEE));
+  }
+  
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      console.log(`Deletando usuário com ID: ${id}`);
+      const [deleted] = await db
+        .delete(users)
+        .where(eq(users.id, id))
+        .returning();
+      console.log("Resultado da exclusão:", deleted ? "Usuário excluído com sucesso" : "Nenhum usuário excluído");
+      return !!deleted;
+    } catch (error) {
+      console.error(`Erro ao excluir usuário ID ${id}:`, error);
+      return false;
+    }
   }
 
   // Product operations

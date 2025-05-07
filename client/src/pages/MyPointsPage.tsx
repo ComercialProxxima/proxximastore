@@ -262,7 +262,7 @@ export default function MyPointsPage() {
                             </Badge>
                           )}
                           {transaction.transactionType === "spent" && (
-                            <Badge className="bg-primary text-secondary border-0">
+                            <Badge className="bg-red-600 text-white border-0">
                               <TrendingDown className="h-3.5 w-3.5 mr-1" />
                               Gasto
                             </Badge>

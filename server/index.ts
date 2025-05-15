@@ -75,6 +75,11 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  console.log("Cookies recebidos:", req.headers.cookie);
+  next();
+});
+
 (async () => {
   const server = await registerRoutes(app);
 

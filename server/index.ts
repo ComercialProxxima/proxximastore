@@ -16,6 +16,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const session = require('express-session');
+const cors = require('cors');
 
 // ✅ CORS (ANTES DE TUDO)
 app.use(cors({
@@ -30,7 +32,7 @@ app.use(session({
   }),
   secret: process.env.SESSION_SECRET || '083Dinho@',
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
     httpOnly: true,
     secure: true, // IMPORTANTE: true no Render (HTTPS)

@@ -40,6 +40,7 @@ app.use(session({
     httpOnly: true,
     secure: true, // importante no Render (https)
     sameSite: 'none', // necessário para cross-domain
+    httpOnly: true,
     maxAge: 1000 * 60 * 60 * 24 * 7 // 7 dias
   }
 }));

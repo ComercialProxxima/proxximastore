@@ -37,7 +37,6 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    httpOnly: true,
     secure: true, // importante no Render (https)
     sameSite: 'none', // necessário para cross-domain
     httpOnly: true,

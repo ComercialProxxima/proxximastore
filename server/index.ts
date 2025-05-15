@@ -4,10 +4,41 @@ import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import { fileURLToPath } from 'url';
 
+// ✅ IMPORTAÇÕES NOVAS
+import cors from 'cors';
+import session from 'express-session';
+import pgSession from 'connect-pg-simple';
+
+// 🧠 setup pgSession
+const PgSession = pgSession(session);
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// ✅ CORS (ANTES DE TUDO)
+app.use(cors({
+  origin: 'https://seu-frontend.onrender.com', // substitua pela URL real
+  credentials: true
+}));
+
+// ✅ SESSION (ANTES DAS ROTAS)
+app.use(session({
+  store: new PgSession({
+    conString: process.env.DATABASE_URL,
+  }),
+  secret: process.env.SESSION_SECRET!,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: true, // IMPORTANTE: true no Render (HTTPS)
+    sameSite: 'none', // IMPORTANTE para cross-domain
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 dias
+  }
+}));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
@@ -55,18 +86,12 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const port = 5000;
   server.listen({
     port,

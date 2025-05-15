@@ -19,7 +19,7 @@ const app = express();
 
 // ✅ CORS (ANTES DE TUDO)
 app.use(cors({
-  origin: 'https://seu-frontend.onrender.com', // substitua pela URL real
+  origin: 'https://lojateste-8tq0.onrender.com/auth', // substitua pela URL real
   credentials: true
 }));
 

@@ -24,6 +24,8 @@ app.use(cors({
   credentials: true
 }));
 
+app.set('trust proxy', 1); // 🔥 ESSENCIAL para funcionar com secure cookies atrás de proxy
+
 // ✅ SESSÃO com PostgreSQL
 app.use(session({
   store: new PgSession({

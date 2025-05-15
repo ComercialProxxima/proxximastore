@@ -16,12 +16,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const session = require('express-session');
-const cors = require('cors');
 
 // ✅ CORS (ANTES DE TUDO)
 app.use(cors({
-  origin: 'https://lojateste-8tq0.onrender.com/auth', // substitua pela URL real
+  origin: 'https://lojateste-8tq0.onrender.com', // substitua pela URL real
   credentials: true
 }));
 

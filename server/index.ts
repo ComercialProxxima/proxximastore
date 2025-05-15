@@ -28,9 +28,9 @@ app.use(session({
   store: new PgSession({
     conString: process.env.DATABASE_URL,
   }),
-  secret: process.env.SESSION_SECRET!,
+  secret: process.env.SESSION_SECRET || '083Dinho@',
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
   cookie: {
     httpOnly: true,
     secure: true, // IMPORTANTE: true no Render (HTTPS)

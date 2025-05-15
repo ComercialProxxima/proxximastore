@@ -4,12 +4,13 @@ import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import { fileURLToPath } from 'url';
 
-// ✅ IMPORTAÇÕES NOVAS
 import cors from 'cors';
 import session from 'express-session';
 import pgSession from 'connect-pg-simple';
+import dotenv from 'dotenv';
 
-// 🧠 setup pgSession
+dotenv.config(); // Carrega variáveis do .env se estiver usando localmente
+
 const PgSession = pgSession(session);
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,34 +18,38 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// ✅ CORS (ANTES DE TUDO)
+// ✅ CORS configurado para aceitar credenciais
 app.use(cors({
-  origin: 'https://lojateste-8tq0.onrender.com', // substitua pela URL real
+  origin: 'https://lojateste-8tq0.onrender.com', // URL do frontend
   credentials: true
 }));
 
-// ✅ SESSION (ANTES DAS ROTAS)
+// ✅ SESSÃO com PostgreSQL
 app.use(session({
   store: new PgSession({
-    conString: process.env.DATABASE_URL,
+    conString: process.env.DATABASE_URL, // já configurado no Render
+    tableName: 'session', // opcional se já estiver usando essa tabela
+    createTableIfMissing: false, // já existe
   }),
   secret: process.env.SESSION_SECRET || '083Dinho@',
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: true, // IMPORTANTE: true no Render (HTTPS)
-    sameSite: 'none', // IMPORTANTE para cross-domain
+    secure: true, // importante no Render (https)
+    sameSite: 'none', // necessário para cross-domain
     maxAge: 1000 * 60 * 60 * 24 * 7 // 7 dias
   }
 }));
 
+// ✅ Parse JSON e URL-encoded
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-// Servir arquivos estáticos da pasta uploads
+// ✅ Arquivos estáticos
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
+// ✅ Log customizado para rotas /api
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -75,6 +80,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// ✅ Log de cookies recebidos (debug)
 app.use((req, res, next) => {
   console.log("Cookies recebidos:", req.headers.cookie);
   next();
@@ -83,6 +89,7 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
+  // ✅ Handler global de erro
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -91,6 +98,7 @@ app.use((req, res, next) => {
     throw err;
   });
 
+  // ✅ Configuração para ambiente (Vite dev ou produção)
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
